@@ -13,4 +13,16 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+
+  resumes Resume[]
+}
+
+model Resume {
+  id            String   @id @default(uuid())
+  filePath      String
+  extractedText String?
+  uploadedAt    DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
