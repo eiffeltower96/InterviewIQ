@@ -102,8 +102,127 @@ const user = await prisma.user.create({
     });
   }
 };
+const getCurrentUser = async (
+    req,
+    res
+) => {
 
+    try {
+
+        const user =
+            await prisma.user.findUnique({
+                where: {
+                    id: req.user.userId
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    createdAt: true
+                }
+            });
+
+        if (!user) {
+
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+
+        }
+
+        res.json({
+            success: true,
+            user
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error"
+        });
+
+    }
+
+};
+const getProfileStats = async (
+    req,
+    res
+) => {
+
+    try {
+
+        const resumes =
+            await prisma.resume.findMany({
+                where: {
+                    userId:
+                        req.user.userId
+                },
+                include: {
+                    analysis: true
+                }
+            });
+
+        const totalResumes =
+            resumes.length;
+
+        const analyzed =
+            resumes.filter(
+                (r) => r.analysis
+            );
+
+        const averageATS =
+            analyzed.length > 0
+                ? Math.round(
+                    analyzed.reduce(
+                        (sum, r) =>
+                            sum +
+                            r.analysis.atsScore,
+                        0
+                    ) /
+                    analyzed.length
+                )
+                : 0;
+
+        const bestATS =
+            analyzed.length > 0
+                ? Math.max(
+                    ...analyzed.map(
+                        (r) =>
+                            r.analysis
+                                .atsScore
+                    )
+                )
+                : 0;
+
+        res.json({
+            success: true,
+            stats: {
+                totalResumes,
+                averageATS,
+                bestATS
+            }
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message:
+                "Server Error"
+        });
+
+    }
+
+};
 module.exports = {
     register,
-    login
+    login,
+    getCurrentUser,
+    getProfileStats
 };

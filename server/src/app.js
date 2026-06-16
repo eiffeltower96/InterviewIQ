@@ -2,8 +2,23 @@ const express = require("express");
 const authRoutes = require("./routes/authRoutes");
 const protect = require("./middleware/authMiddleware");
 const resumeRoutes = require("./routes/resumeRoutes");
+const cors = require("cors");
+
 const app = express();
+app.use(
+    cors({
+        origin: "http://localhost:5173"
+    })
+);
 app.use(express.json());
+const analysisRoutes =
+    require("./routes/analysisRoutes");
+
+app.use(
+    "/api/analysis",
+    analysisRoutes
+);
+
 app.use("/api/auth", authRoutes);
 app.use("/api/resume", resumeRoutes);
 app.get("/", (req, res) => {

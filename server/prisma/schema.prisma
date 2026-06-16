@@ -13,16 +13,28 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
-
-  resumes Resume[]
+  resumes   Resume[]
 }
 
 model Resume {
-  id            String   @id @default(uuid())
-  filePath      String
-  extractedText String?
-  uploadedAt    DateTime @default(now())
+  id             String          @id @default(uuid())
+  filePath       String
+  extractedText  String?
+  uploadedAt     DateTime        @default(now())
+  userId         String
+  jobDescription String?
+  user           User            @relation(fields: [userId], references: [id])
+  analysis       ResumeAnalysis?
+}
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+model ResumeAnalysis {
+  id              String   @id @default(uuid())
+  atsScore        Int
+  strengths       Json
+  weaknesses      Json
+  suggestions     Json
+  createdAt       DateTime @default(now())
+  resumeId        String   @unique
+  missingKeywords Json
+  resume          Resume   @relation(fields: [resumeId], references: [id])
 }
