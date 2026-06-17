@@ -5,10 +5,9 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ResumeDetails from "./pages/ResumeDetails";
 import UploadResume from "./pages/UploadResume";
-import ProtectedRoute
-    from "./components/ProtectedRoute";
-import Profile
-from "./pages/Profile";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Profile from "./pages/Profile";
+import CareerCoachPage from "./pages/CareerCoachPage";
 function App() {
     return (
     <Routes>
@@ -60,7 +59,15 @@ function App() {
                     <UploadResume />
                 </ProtectedRoute>
             }
-        />
+            />
+            <Route
+    path="/resume/:id/coach"
+    element={
+        <ProtectedRoute>
+            <CareerCoachPage />
+        </ProtectedRoute>
+    }
+/>
 
     </Routes>
 );

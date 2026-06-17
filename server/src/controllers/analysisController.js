@@ -64,14 +64,41 @@ console.log("Finding resume...");
 
     } catch (error) {
 
-        console.error(error);
+    console.error(error);
 
-        res.status(500).json({
-            success: false,
-            message: "Server Error"
+    try {
+
+        const { resumeId } = req.body;
+
+        await prisma.resumeAnalysis.deleteMany({
+            where: {
+                resumeId
+            }
         });
 
+        await prisma.resume.deleteMany({
+            where: {
+                id: resumeId,
+                userId: req.user.userId
+            }
+        });
+
+    } catch (cleanupError) {
+
+        console.error(
+            "Cleanup Error:",
+            cleanupError
+        );
+
     }
+
+    res.status(500).json({
+        success: false,
+        message:
+            "Analysis failed. Please try again."
+    });
+
+}
 
 };
 

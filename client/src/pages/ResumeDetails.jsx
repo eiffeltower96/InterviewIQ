@@ -5,7 +5,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import ATSScoreCard from "../components/ATSScoreCard";
 import AnalysisListCard from "../components/AnalysisListCard";
 import Loader from "../components/Loader";
-
+import CareerCoachCTA from "../components/CareerCoachCTA";
 function ResumeDetails() {
     const { id } = useParams();
     const [resume, setResume] = useState(null);
@@ -25,8 +25,6 @@ function ResumeDetails() {
     if (!resume) {
         return <Loader />;
     }
-
-    console.log(resume);
 
     return (
         <DashboardLayout>
@@ -83,6 +81,9 @@ function ResumeDetails() {
                         items={resume.analysis.suggestions}
                     />
                 </div>
+
+                {/* AI Career Coach CTA — natural next step after reading the report */}
+                <CareerCoachCTA resume={resume} />
 
             </div>
         </DashboardLayout>

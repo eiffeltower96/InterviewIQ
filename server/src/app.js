@@ -2,6 +2,8 @@ const express = require("express");
 const authRoutes = require("./routes/authRoutes");
 const protect = require("./middleware/authMiddleware");
 const resumeRoutes = require("./routes/resumeRoutes");
+const chatRoutes =
+    require("./routes/chatRoutes");
 const cors = require("cors");
 
 const app = express();
@@ -21,7 +23,10 @@ app.use(
     "/api/analysis",
     analysisRoutes
 );
-
+app.use(
+    "/api/chat",
+    chatRoutes
+);
 app.use("/api/auth", authRoutes);
 app.use("/api/resume", resumeRoutes);
 app.get("/", (req, res) => {
