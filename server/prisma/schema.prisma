@@ -23,8 +23,11 @@ model Resume {
   uploadedAt     DateTime        @default(now())
   userId         String
   jobDescription String?
+
   user           User            @relation(fields: [userId], references: [id])
   analysis       ResumeAnalysis?
+
+  chats          Chat[]
 }
 
 model ResumeAnalysis {
@@ -37,4 +40,25 @@ model ResumeAnalysis {
   resumeId        String   @unique
   missingKeywords Json
   resume          Resume   @relation(fields: [resumeId], references: [id])
+}
+model Chat {
+  id        String   @id @default(uuid())
+  title     String
+  createdAt DateTime @default(now())
+
+  resumeId  String
+  resume    Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  messages  ChatMessage[]
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  role      String
+  content   String
+
+  createdAt DateTime @default(now())
+
+  chatId    String
+  chat      Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
 }

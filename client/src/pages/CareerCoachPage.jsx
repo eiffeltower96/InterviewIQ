@@ -24,7 +24,7 @@ function CareerCoachPage() {
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
   const [isSending, setIsSending] = useState(false);
-
+const [chatId, setChatId] = useState(null);
   useEffect(() => {
     const fetchResume = async () => {
       try {
@@ -36,18 +36,79 @@ function CareerCoachPage() {
     };
     fetchResume();
   }, [id]);
+  useEffect(() => {
 
-  // Build a fresh, untitled conversation when none is active yet.
-  const ensureConversation = useCallback(() => {
-    if (activeConversationId) return activeConversationId;
-    const newId = `c_${Date.now()}`;
-    setConversations((prev) => [
-      { id: newId, title: "New conversation", timeLabel: "Just now" },
-      ...prev,
+  const fetchChats = async () => {
+
+    try {
+
+      const response =
+        await api.get(
+          `/chat/resume/${id}`
+        );
+
+      setConversations(
+        response.data.chats.map(
+          (chat) => ({
+            id: chat.id,
+            title: chat.title,
+            timeLabel: ""
+          })
+        )
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  };
+
+  fetchChats();
+
+}, [id]);
+const createChat = async () => {
+
+  try {
+
+    const response =
+      await api.post(
+        "/chat/create",
+        {
+          resumeId: id
+        }
+      );
+
+    const chat =
+      response.data.chat;
+
+    setChatId(chat.id);
+
+    setConversations(prev => [
+      {
+        id: chat.id,
+        title: chat.title,
+        timeLabel: "Just now"
+      },
+      ...prev
     ]);
-    setActiveConversationId(newId);
-    return newId;
-  }, [activeConversationId]);
+
+    setActiveConversationId(chat.id);
+
+    return chat.id;
+
+  } catch (error) {
+
+    console.error(error);
+
+    return null;
+
+  }
+
+};
+  // Build a fresh, untitled conversation when none is active yet.
+  
 
   const handleNewConversation = () => {
     setActiveConversationId(null);
@@ -66,7 +127,16 @@ function CareerCoachPage() {
     const text = (textOverride ?? draft).trim();
     if (!text || isSending) return;
 
-    const convId = ensureConversation();
+    let convId = chatId;
+
+if (!convId) {
+
+  convId =
+    await createChat();
+
+  if (!convId) return;
+
+}
     const userMsg = { id: nextId(), role: "user", content: text };
     const streamingMsg = { id: nextId(), role: "assistant", content: "", isStreaming: true };
 
@@ -91,7 +161,8 @@ function CareerCoachPage() {
   "/chat",
   {
     resumeId: id,
-    question: text
+    question: text,
+    chatId: convId
   }
 );
 
