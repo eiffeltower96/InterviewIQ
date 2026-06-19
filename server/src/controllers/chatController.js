@@ -2,7 +2,8 @@ const prisma =
     require("../config/prisma");
 
 const {
-    askResume
+    askResume,
+    generateChatTitle
 } = require("../services/chatService");
 
 const chatWithResume =
@@ -38,8 +39,72 @@ const chatWithResume =
                     });
 
             }
+            let chat = null;
+
 if (chatId) {
 
+    chat =
+        await prisma.chat.findUnique({
+            where: {
+                id: chatId
+            }
+        });
+console.log(
+    "Chat ID:",
+    chatId
+);
+
+console.log(
+    "Chat:",
+    chat
+);
+            }
+            
+if (chatId) {
+if (
+    chat &&
+    chat.title === "New Chat"
+) {
+
+    console.log(
+        "Generating title..."
+    );
+
+    try {
+
+        const title =
+            await generateChatTitle(
+                question
+            );
+
+        console.log(
+            "Generated title:",
+            title
+        );
+
+        await prisma.chat.update({
+            where: {
+                id: chatId
+            },
+            data: {
+                title
+            }
+        });
+
+        console.log(
+            "Title updated"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Title generation failed:",
+            error
+        );
+
+    }
+
+}
     await prisma.chatMessage.create({
         data: {
             chatId,

@@ -42,7 +42,34 @@ Answer:
         .text()
         .trim();
 };
+const generateChatTitle =
+async (question) => {
 
+    const prompt = `
+Generate a short title
+for this career conversation.
+
+Rules:
+- Maximum 4 words
+- No quotes
+- No punctuation
+- Professional
+
+Question:
+${question}
+`;
+
+    const result =
+        await model.generateContent(
+            prompt
+        );
+
+    return result.response
+        .text()
+        .trim();
+
+};
 module.exports = {
-    askResume
+    askResume,
+    generateChatTitle
 };
