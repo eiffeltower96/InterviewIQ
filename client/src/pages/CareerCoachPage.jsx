@@ -36,34 +36,34 @@ const [chatId, setChatId] = useState(null);
     };
     fetchResume();
   }, [id]);
-  useEffect(() => {
+const fetchChats = async () => {
 
-  const fetchChats = async () => {
+  try {
 
-    try {
-
-      const response =
-        await api.get(
-          `/chat/resume/${id}`
-        );
-
-      setConversations(
-        response.data.chats.map(
-          (chat) => ({
-            id: chat.id,
-            title: chat.title,
-            timeLabel: ""
-          })
-        )
+    const response =
+      await api.get(
+        `/chat/resume/${id}`
       );
 
-    } catch (error) {
+    setConversations(
+      response.data.chats.map(
+        (chat) => ({
+          id: chat.id,
+          title: chat.title,
+          timeLabel: ""
+        })
+      )
+    );
 
-      console.error(error);
+  } catch (error) {
 
-    }
+    console.error(error);
 
-  };
+  }
+
+};
+
+useEffect(() => {
 
   fetchChats();
 
@@ -84,7 +84,7 @@ const createChat = async () => {
       response.data.chat;
 
     setChatId(chat.id);
-
+setMessages([]);
     setConversations(prev => [
       {
         id: chat.id,
@@ -112,16 +112,58 @@ const createChat = async () => {
 
   const handleNewConversation = () => {
     setActiveConversationId(null);
+    setChatId(null);
     setMessages([]);
     setDraft("");
   };
 
-  const handleSelectConversation = (convId) => {
-    setActiveConversationId(convId);
-    // In a real implementation: fetch messages for this conversation.
-    // Kept empty here since this is a UI/structure deliverable.
-    setMessages([]);
-  };
+const handleSelectConversation =
+    async (conversationId) => {
+
+        try {
+
+            setActiveConversationId(
+                conversationId
+            );
+
+            setChatId(
+                conversationId
+            );
+console.log(
+  "Selected chat:",
+  conversationId
+);
+            const response =
+                await api.get(
+                    `/chat/${conversationId}`
+                );
+console.log(
+  "Messages response:",
+  response.data
+);
+            const loadedMessages =
+    response.data.messages.map(
+        (message) => ({
+            id: message.id,
+            role: message.role,
+            content: message.content
+        })
+    );
+
+            setMessages(
+                loadedMessages
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Error loading messages:",
+                error
+            );
+
+        }
+
+    };
 
   const sendMessage = async (textOverride) => {
     const text = (textOverride ?? draft).trim();
@@ -168,7 +210,8 @@ if (!convId) {
 
      const answer =
     response.data.answer;
-
+      await fetchChats();
+      setActiveConversationId(convId);
       setMessages((prev) =>
         prev.map((m) =>
           m.id === streamingMsg.id
@@ -200,7 +243,53 @@ isStreaming: false }
   }
 
   const score = resume?.analysis?.atsScore;
+const handleDeleteChat =
+  async (chatIdToDelete) => {
 
+    try {
+
+      await api.delete(
+        `/chat/${chatIdToDelete}`
+      );
+
+      setConversations(
+        prev =>
+          prev.filter(
+            chat =>
+              chat.id !==
+              chatIdToDelete
+          )
+      );
+
+      if (
+        activeConversationId ===
+        chatIdToDelete
+      ) {
+
+        setActiveConversationId(
+          null
+        );
+
+        setChatId(
+          null
+        );
+
+        setMessages(
+          []
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Error deleting chat:",
+        error
+      );
+
+    }
+
+};
   return (
     <DashboardLayout>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');`}</style>
@@ -225,6 +314,7 @@ isStreaming: false }
             conversations={conversations}
             activeConversationId={activeConversationId}
             onSelectConversation={handleSelectConversation}
+            onDeleteConversation={handleDeleteChat}
             onNewConversation={handleNewConversation}
           />
         </div>
@@ -242,24 +332,29 @@ isStreaming: false }
           >
             <div style={{ position: "absolute", inset: "0 auto 0 0", height: "100%" }} onClick={(e) => e.stopPropagation()}>
               <CoachSidebar
-                collapsed={false}
-                onToggleCollapse={() => setMobileSidebarOpen(false)}
-                activeMode={activeMode}
-                onSelectMode={(m) => {
-                  setActiveMode(m);
-                  setMobileSidebarOpen(false);
-                }}
-                conversations={conversations}
-                activeConversationId={activeConversationId}
-                onSelectConversation={(c) => {
-                  handleSelectConversation(c);
-                  setMobileSidebarOpen(false);
-                }}
-                onNewConversation={() => {
-                  handleNewConversation();
-                  setMobileSidebarOpen(false);
-                }}
-              />
+  collapsed={false}
+  onToggleCollapse={() =>
+    setMobileSidebarOpen(false)
+  }
+  activeMode={activeMode}
+  onSelectMode={(m) => {
+    setActiveMode(m);
+    setMobileSidebarOpen(false);
+  }}
+  conversations={conversations}
+  activeConversationId={activeConversationId}
+  onSelectConversation={(c) => {
+    handleSelectConversation(c);
+    setMobileSidebarOpen(false);
+  }}
+  onDeleteConversation={
+    handleDeleteChat
+  }
+  onNewConversation={() => {
+    handleNewConversation();
+    setMobileSidebarOpen(false);
+  }}
+/>
             </div>
           </div>
         )}

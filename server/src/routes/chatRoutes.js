@@ -8,7 +8,8 @@ const {
     chatWithResume,
     createChat,
     getResumeChats,
-    getChatMessages
+    getChatMessages,
+    deleteChat
 } = require(
     "../controllers/chatController"
 );
@@ -39,5 +40,9 @@ router.post(
     protect,
     chatWithResume
 );
-
+router.delete(
+    "/:chatId",
+    protect,
+    deleteChat
+);
 module.exports = router;

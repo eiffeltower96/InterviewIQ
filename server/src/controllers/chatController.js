@@ -266,9 +266,59 @@ const getChatMessages =
         }
 
     };
+    const deleteChat =
+async (req, res) => {
+
+    try {
+
+        const { chatId } =
+            req.params;
+
+        const chat =
+            await prisma.chat.findUnique({
+                where: {
+                    id: chatId
+                }
+            });
+
+        if (!chat) {
+
+            return res.status(404)
+                .json({
+                    success: false,
+                    message:
+                        "Chat not found"
+                });
+
+        }
+
+        await prisma.chat.delete({
+            where: {
+                id: chatId
+            }
+        });
+
+        res.json({
+            success: true
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message:
+                "Server Error"
+        });
+
+    }
+
+};
 module.exports = {
     chatWithResume,
     createChat,
     getResumeChats,
-    getChatMessages
+    getChatMessages,
+    deleteChat
 };

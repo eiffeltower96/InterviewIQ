@@ -111,7 +111,12 @@ function CoachSidebar({
   activeConversationId,
   onSelectConversation,
   onNewConversation,
+  onDeleteConversation,
 }) {
+  console.log(
+  "onDeleteConversation:",
+  onDeleteConversation
+);
   const [hoveredMode, setHoveredMode] = useState(null);
 
   if (collapsed) {
@@ -329,33 +334,82 @@ function CoachSidebar({
             {conversations.map((conv) => {
               const isActive = conv.id === activeConversationId;
               return (
-                <button
-                  key={conv.id}
-                  onClick={() => onSelectConversation(conv.id)}
-                  style={{
-                    textAlign: "left",
-                    width: "100%",
-                    padding: "9px 10px",
-                    borderRadius: 9,
-                    border: "none",
-                    background: isActive ? "rgba(255,255,255,0.06)" : "transparent",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color: isActive ? "#fff" : "#9ca3af",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {conv.title}
-                  </div>
-                  <div style={{ fontSize: 11, color: "#4b5563", marginTop: 2 }}>{conv.timeLabel}</div>
-                </button>
+                <div
+  key={conv.id}
+  style={{
+    position: "relative",
+  }}
+>
+  <button
+    onClick={() => onSelectConversation(conv.id)}
+    style={{
+      textAlign: "left",
+      width: "100%",
+      padding: "9px 36px 9px 10px",
+      borderRadius: 9,
+      border: "none",
+      background: isActive
+        ? "rgba(255,255,255,0.06)"
+        : "transparent",
+      cursor: "pointer",
+    }}
+  >
+    <div
+      style={{
+        fontSize: 13,
+        fontWeight: 500,
+        color: isActive
+          ? "#fff"
+          : "#9ca3af",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {conv.title}
+    </div>
+
+    <div
+      style={{
+        fontSize: 11,
+        color: "#4b5563",
+        marginTop: 2,
+      }}
+    >
+      {conv.timeLabel}
+    </div>
+  </button>
+
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+
+      if (
+        window.confirm(
+          "Delete this conversation?"
+        )
+      ) {
+        onDeleteConversation(
+          conv.id
+        );
+      }
+    }}
+    style={{
+      position: "absolute",
+      right: 8,
+      top: "50%",
+      transform:
+        "translateY(-50%)",
+      background: "transparent",
+      border: "none",
+      color: "#6b7280",
+      cursor: "pointer",
+      fontSize: 14,
+    }}
+  >
+    🗑️
+  </button>
+</div>
               );
             })}
           </div>
