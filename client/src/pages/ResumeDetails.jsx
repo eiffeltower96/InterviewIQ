@@ -6,6 +6,7 @@ import ATSScoreCard from "../components/ATSScoreCard";
 import AnalysisListCard from "../components/AnalysisListCard";
 import Loader from "../components/Loader";
 import CareerCoachCTA from "../components/CareerCoachCTA";
+import ResumeWorkspaceSidebar from "../components/ResumeWorkspaceSidebar";
 function ResumeDetails() {
     const { id } = useParams();
     const [resume, setResume] = useState(null);
@@ -30,7 +31,21 @@ function ResumeDetails() {
         <DashboardLayout>
             <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');`}</style>
 
-            <div style={{ fontFamily: "Inter, sans-serif", maxWidth: 900, margin: "0 auto" }}>
+            <div
+    style={{
+        display: "flex",
+        gap: 24,
+        alignItems: "flex-start",
+        fontFamily: "Inter, sans-serif"
+    }}
+            >
+                <ResumeWorkspaceSidebar />
+                <div
+        style={{
+            flex: 1,
+            maxWidth: 900
+        }}
+    >
 
                 {/* Header */}
                 <div style={{ marginBottom: 32 }}>
@@ -82,10 +97,9 @@ function ResumeDetails() {
                     />
                 </div>
 
-                {/* AI Career Coach CTA — natural next step after reading the report */}
-                <CareerCoachCTA resume={resume} />
 
-            </div>
+                </div>
+                </div>
         </DashboardLayout>
     );
 }

@@ -8,6 +8,9 @@ import UploadResume from "./pages/UploadResume";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
 import CareerCoachPage from "./pages/CareerCoachPage";
+import DreamCompanyPage from "./pages/DreamCompanyPage";
+import InterviewSimulatorPage from "./pages/InterviewSimulatorPage";
+import ResumeStudioPage from "./pages/ResumeStudioPage";
 function App() {
     return (
     <Routes>
@@ -67,6 +70,20 @@ function App() {
             <CareerCoachPage />
         </ProtectedRoute>
     }
+            
+/>
+<Route
+    path="/resume/:id/dream-company"
+    element={<DreamCompanyPage />}
+/>
+
+<Route
+    path="/resume/:id/interview"
+    element={<InterviewSimulatorPage />}
+/>
+<Route
+    path="/resume/:id/studio"
+    element={<ResumeStudioPage />}
 />
 
     </Routes>

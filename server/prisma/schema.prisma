@@ -17,17 +17,17 @@ model User {
 }
 
 model Resume {
-  id             String          @id @default(uuid())
-  filePath       String
-  extractedText  String?
-  uploadedAt     DateTime        @default(now())
-  userId         String
-  jobDescription String?
+  id              String            @id @default(uuid())
+  filePath        String
+  extractedText   String?
+  uploadedAt      DateTime          @default(now())
+  userId          String
+  jobDescription  String?
+  companyAnalyses CompanyAnalysis[]
+  user            User              @relation(fields: [userId], references: [id])
+  analysis        ResumeAnalysis?
 
-  user           User            @relation(fields: [userId], references: [id])
-  analysis       ResumeAnalysis?
-
-  chats          Chat[]
+  chats Chat[]
 }
 
 model ResumeAnalysis {
@@ -41,24 +41,39 @@ model ResumeAnalysis {
   missingKeywords Json
   resume          Resume   @relation(fields: [resumeId], references: [id])
 }
+
 model Chat {
   id        String   @id @default(uuid())
   title     String
   createdAt DateTime @default(now())
 
-  resumeId  String
-  resume    Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  resumeId String
+  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
-  messages  ChatMessage[]
+  messages ChatMessage[]
 }
 
 model ChatMessage {
-  id        String   @id @default(uuid())
-  role      String
-  content   String
+  id      String @id @default(uuid())
+  role    String
+  content String
 
   createdAt DateTime @default(now())
 
-  chatId    String
-  chat      Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId String
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
+
+model CompanyAnalysis {
+  id String @id @default(uuid())
+
+  company String
+  role    String
+
+  result Json
+
+  createdAt DateTime @default(now())
+
+  resumeId String
+  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 }

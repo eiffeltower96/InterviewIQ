@@ -1,0 +1,92 @@
+const prisma =
+  require("../config/prisma");
+
+const analyzeCompany =
+async (req, res) => {
+
+    try {
+
+        const {
+            resumeId,
+            company,
+            role
+        } = req.body;
+
+        const mockResult = {
+
+            overallScore: 78,
+
+            shortlistChance: 74,
+
+            profileStrength: 82,
+
+            competitionLevel: "High",
+
+            categoryScores: {
+                technicalSkills: 85,
+                projects: 72,
+                experience: 68,
+                dsa: 92,
+                communication: 65
+            },
+
+            strengths: [
+                "Strong DSA",
+                "Good React knowledge",
+                "Solid academics"
+            ],
+
+            missingSkills: [
+                "TypeScript",
+                "Testing",
+                "System Design"
+            ],
+
+            focusAreas: [
+                "React Internals",
+                "Performance",
+                "Behavioral"
+            ],
+
+            verdict:
+                "Good potential candidate",
+
+            roadmap: [
+                "Learn TypeScript",
+                "Build a project",
+                "Practice interviews",
+                "Apply actively"
+            ]
+
+        };
+
+        const analysis =
+            await prisma.companyAnalysis.create({
+                data: {
+                    company,
+                    role,
+                    resumeId,
+                    result: mockResult
+                }
+            });
+
+        res.json({
+            success: true,
+            analysis
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false
+        });
+
+    }
+
+};
+
+module.exports = {
+    analyzeCompany
+};

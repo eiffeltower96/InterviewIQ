@@ -4,6 +4,11 @@ const protect = require("./middleware/authMiddleware");
 const resumeRoutes = require("./routes/resumeRoutes");
 const chatRoutes =
     require("./routes/chatRoutes");
+const companyAnalysisRoutes =
+require(
+  "./routes/companyAnalysisRoutes"
+);
+
 const cors = require("cors");
 
 const app = express();
@@ -18,7 +23,10 @@ app.use(
 app.use(express.json());
 const analysisRoutes =
     require("./routes/analysisRoutes");
-
+app.use(
+  "/api/company-analysis",
+  companyAnalysisRoutes
+);
 app.use(
     "/api/analysis",
     analysisRoutes
