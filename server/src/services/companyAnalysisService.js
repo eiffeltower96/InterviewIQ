@@ -79,13 +79,20 @@ Rules:
       await model.generateContent(
           prompt
       );
-
     const text =
-      result.response
-        .text()
-        .trim();
+  result.response
+    .text()
+    .trim();
 
-    return JSON.parse(text);
+const cleaned =
+  text
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+
+console.log(cleaned);
+
+return JSON.parse(cleaned);
 
 };
 
