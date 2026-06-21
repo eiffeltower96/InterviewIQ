@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
-function Sidebar() {
+function Sidebar({ collapsed, onToggle }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -11,18 +11,20 @@ function Sidebar() {
 
   const navItems = [
     { to: "/dashboard", icon: "📊", label: "Dashboard" },
-    { to: "/upload",    icon: "📄", label: "Upload Resume" },
-    { to: "/profile",  icon: "👤", label: "Profile" },
+    { to: "/upload", icon: "📄", label: "Upload Resume" },
+    { to: "/profile", icon: "👤", label: "Profile" },
   ];
 
   return (
     <div
-      className="
-        w-64 min-h-screen flex flex-col justify-between
+      className={`
+        ${collapsed ? "w-20" : "w-64"}
+        min-h-screen flex flex-col justify-between
         bg-[#0d0d14]
         border-r border-white/[0.06]
         relative overflow-hidden
-      "
+        transition-all duration-300
+      `}
     >
       {/* Ambient glow top-left */}
       <div
@@ -42,39 +44,64 @@ function Sidebar() {
         "
       />
 
-      {/* ── TOP SECTION ── */}
+      {/* TOP SECTION */}
       <div className="relative z-10">
 
         {/* Brand */}
-        <div className="px-6 pt-8 pb-6">
+        <div className="px-6 pt-8 pb-6 relative">
+
+          <button
+            onClick={onToggle}
+            className="
+              absolute top-8 right-4
+              text-gray-400 hover:text-white
+              transition-colors
+            "
+          >
+            {collapsed ? "→" : "←"}
+          </button>
+
           <div className="flex items-center gap-2.5 mb-1">
-            {/* Logo mark */}
+
             <span
               className="
                 w-8 h-8 rounded-lg
                 bg-gradient-to-br from-violet-500 to-indigo-600
                 flex items-center justify-center
-                text-white text-sm font-bold shadow-lg shadow-violet-500/30
+                text-white text-sm font-bold
+                shadow-lg shadow-violet-500/30
               "
             >
               IQ
             </span>
-            <h1 className="text-xl font-bold tracking-tight text-white">
-              Interview<span className="text-violet-400">IQ</span>
-            </h1>
+
+            {!collapsed && (
+              <h1 className="text-xl font-bold tracking-tight text-white">
+                Interview
+                <span className="text-violet-400">
+                  IQ
+                </span>
+              </h1>
+            )}
+
           </div>
-          <p className="text-xs text-gray-500 ml-[42px] tracking-wide uppercase">
-            AI Resume Analyzer
-          </p>
+
+          {!collapsed && (
+            <p className="text-xs text-gray-500 ml-[42px] tracking-wide uppercase">
+              AI Resume Analyzer
+            </p>
+          )}
+
         </div>
 
         {/* Divider */}
         <div className="h-px mx-6 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-        {/* Nav */}
+        {/* Navigation */}
         <nav className="p-4 mt-2 space-y-1">
           {navItems.map(({ to, icon, label }) => {
             const active = location.pathname === to;
+
             return (
               <Link
                 key={to}
@@ -89,7 +116,6 @@ function Sidebar() {
                   }
                 `}
               >
-                {/* Active indicator pill */}
                 <span
                   className={`
                     w-0.5 h-4 rounded-full transition-all duration-200
@@ -98,8 +124,13 @@ function Sidebar() {
                   `}
                 />
 
-                <span className="text-base leading-none">{icon}</span>
-                <span>{label}</span>
+                <span className="text-base leading-none">
+                  {icon}
+                </span>
+
+                {!collapsed && (
+                  <span>{label}</span>
+                )}
 
                 {active && (
                   <span
@@ -115,9 +146,9 @@ function Sidebar() {
         </nav>
       </div>
 
-      {/* ── BOTTOM SECTION ── */}
+      {/* BOTTOM SECTION */}
       <div className="relative z-10 p-4">
-        {/* Divider */}
+
         <div className="h-px mb-4 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
         <button
@@ -131,17 +162,26 @@ function Sidebar() {
             transition-all duration-200
           "
         >
-          <span className="text-base">🚪</span>
-          <span>Logout</span>
-          <span
-            className="
-              ml-auto opacity-0 group-hover:opacity-100
-              text-red-400 text-xs transition-opacity
-            "
-          >
-            →
+          <span className="text-base">
+            🚪
           </span>
+
+          {!collapsed && (
+            <span>Logout</span>
+          )}
+
+          {!collapsed && (
+            <span
+              className="
+                ml-auto opacity-0 group-hover:opacity-100
+                text-red-400 text-xs transition-opacity
+              "
+            >
+              →
+            </span>
+          )}
         </button>
+
       </div>
     </div>
   );

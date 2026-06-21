@@ -1,92 +1,77 @@
 const prisma =
   require("../config/prisma");
 
+const {
+  analyzeDreamCompany
+} = require(
+  "../services/companyAnalysisService"
+);
+
 const analyzeCompany =
 async (req, res) => {
 
-    try {
+  try {
 
-        const {
-            resumeId,
-            company,
-            role
-        } = req.body;
+    const {
+      resumeId,
+      company,
+      role
+    } = req.body;
 
-        const mockResult = {
+    const resume =
+      await prisma.resume.findUnique({
+        where: {
+          id: resumeId
+        }
+      });
 
-            overallScore: 78,
+    if (!resume) {
 
-            shortlistChance: 74,
-
-            profileStrength: 82,
-
-            competitionLevel: "High",
-
-            categoryScores: {
-                technicalSkills: 85,
-                projects: 72,
-                experience: 68,
-                dsa: 92,
-                communication: 65
-            },
-
-            strengths: [
-                "Strong DSA",
-                "Good React knowledge",
-                "Solid academics"
-            ],
-
-            missingSkills: [
-                "TypeScript",
-                "Testing",
-                "System Design"
-            ],
-
-            focusAreas: [
-                "React Internals",
-                "Performance",
-                "Behavioral"
-            ],
-
-            verdict:
-                "Good potential candidate",
-
-            roadmap: [
-                "Learn TypeScript",
-                "Build a project",
-                "Practice interviews",
-                "Apply actively"
-            ]
-
-        };
-
-        const analysis =
-            await prisma.companyAnalysis.create({
-                data: {
-                    company,
-                    role,
-                    resumeId,
-                    result: mockResult
-                }
-            });
-
-        res.json({
-            success: true,
-            analysis
-        });
-
-    } catch (error) {
-
-        console.error(error);
-
-        res.status(500).json({
-            success: false
+      return res.status(404)
+        .json({
+          success: false,
+          message:
+            "Resume not found"
         });
 
     }
 
+    const analysisResult =
+      await analyzeDreamCompany(
+        resume.extractedText,
+        company,
+        role
+      );
+
+    const analysis =
+      await prisma.companyAnalysis.create({
+        data: {
+          company,
+          role,
+          resumeId,
+          result: analysisResult
+        }
+      });
+
+    res.json({
+      success: true,
+      analysis
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message:
+        "Failed to analyze company"
+    });
+
+  }
+
 };
 
 module.exports = {
-    analyzeCompany
+  analyzeCompany
 };
