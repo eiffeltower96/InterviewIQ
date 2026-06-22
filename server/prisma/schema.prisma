@@ -91,6 +91,24 @@ model InterviewSession {
   createdAt DateTime @default(now())
 
   resumeId String
-
+answers InterviewAnswer[]
   resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+}
+model InterviewAnswer {
+
+  id String @id @default(uuid())
+
+  answer String
+
+  score Int?
+
+  feedback Json?
+
+  questionIndex Int
+
+  sessionId String
+
+  session InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }
