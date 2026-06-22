@@ -8,7 +8,8 @@ const companyAnalysisRoutes =
 require(
   "./routes/companyAnalysisRoutes"
 );
-
+const interviewRoutes =
+require("./routes/interviewRoutes");
 const cors = require("cors");
 
 const app = express();
@@ -34,6 +35,10 @@ app.use(
 app.use(
     "/api/chat",
     chatRoutes
+);
+app.use(
+    "/api/interview",
+    interviewRoutes
 );
 app.use("/api/auth", authRoutes);
 app.use("/api/resume", resumeRoutes);

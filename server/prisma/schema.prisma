@@ -26,7 +26,7 @@ model Resume {
   companyAnalyses CompanyAnalysis[]
   user            User              @relation(fields: [userId], references: [id])
   analysis        ResumeAnalysis?
-
+interviewSessions InterviewSession[]
   chats Chat[]
 }
 
@@ -76,4 +76,21 @@ model CompanyAnalysis {
 
   resumeId String
   resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+}
+model InterviewSession {
+
+  id String @id @default(uuid())
+
+  company String
+  role String
+
+  interviewType String
+
+  questions Json
+
+  createdAt DateTime @default(now())
+
+  resumeId String
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 }
