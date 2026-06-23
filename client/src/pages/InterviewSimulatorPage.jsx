@@ -9,7 +9,16 @@ function InterviewSimulatorPage() {
   const { id } = useParams();
 const [questions,
 setQuestions] =
-useState([]);
+        useState([]);
+    const [sessionId, setSessionId] = useState(null);
+
+const [currentQuestion, setCurrentQuestion] = useState(0);
+
+const [answer, setAnswer] = useState("");
+
+const [evaluation, setEvaluation] = useState(null);
+
+const [evaluating, setEvaluating] = useState(false);
     const [company, setCompany] =
         useState("");
 
@@ -40,8 +49,16 @@ async () => {
             );
 
         setQuestions(
-            response.data.session.questions
-        );
+    response.data.session.questions
+);
+
+setSessionId(
+    response.data.session.id
+);
+
+setCurrentQuestion(0);
+setAnswer("");
+setEvaluation(null);
 
     } catch (error) {
 
@@ -50,6 +67,46 @@ async () => {
     } finally {
 
         setLoading(false);
+
+    }
+
+        };
+    const handleEvaluate =
+async () => {
+
+    try {
+
+        setEvaluating(true);
+
+        const response =
+            await api.post(
+                "/interview/evaluate",
+                {
+                    sessionId,
+                    questionIndex:
+                        currentQuestion,
+
+                    question:
+                        questions[currentQuestion],
+
+                    answer,
+
+                    company,
+                    role
+                }
+            );
+
+        setEvaluation(
+            response.data.evaluation
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+    } finally {
+
+        setEvaluating(false);
 
     }
 
@@ -183,61 +240,184 @@ async () => {
 
             </div>
             {
-    questions.length > 0 && (
+  questions.length > 0 && (
 
-        <div
-            style={{
-                marginTop: 24
-            }}
+    <div
+      style={{
+        marginTop: 24
+      }}
+    >
+
+      <div
+        style={{
+          background: "#111827",
+          border: "1px solid #1f2937",
+          borderRadius: 16,
+          padding: 24
+        }}
+      >
+
+        <h2
+          style={{
+            color: "white"
+          }}
         >
+          Question {currentQuestion + 1} of {questions.length}
+        </h2>
 
-            <h2
-                style={{
-                    color: "white",
-                    marginBottom: 20
-                }}
-            >
-                Interview Questions
-            </h2>
+        <p
+          style={{
+            color: "#e5e7eb",
+            fontSize: 18,
+            marginTop: 12
+          }}
+        >
+          {questions[currentQuestion]}
+        </p>
 
-            {
-                questions.map(
-                    (question, index) => (
+        <textarea
+          value={answer}
+          onChange={(e) =>
+            setAnswer(e.target.value)
+          }
+          placeholder="Write your answer here..."
+          style={{
+            width: "100%",
+            minHeight: 160,
+            marginTop: 20,
+            padding: 12,
+            borderRadius: 10,
+            background: "#0f172a",
+            color: "white",
+            border: "1px solid #374151"
+          }}
+        />
 
-                        <div
-                            key={index}
-                            style={{
-                                background:
-                                    "#111827",
-                                border:
-                                    "1px solid #1f2937",
-                                borderRadius:
-                                    12,
-                                padding:
-                                    20,
-                                marginBottom:
-                                    12,
-                                color:
-                                    "white"
-                            }}
-                        >
-                            <strong>
-                                Question {index + 1}
-                            </strong>
-
-                            <p>
-                                {question}
-                            </p>
-
-                        </div>
-
-                    )
-                )
+        {!evaluation && (
+          <button
+            onClick={handleEvaluate}
+            disabled={
+              evaluating ||
+              !answer.trim()
             }
+            style={{
+              marginTop: 16
+            }}
+          >
+            {
+              evaluating
+                ? "Evaluating..."
+                : "Evaluate Answer"
+            }
+          </button>
+        )}
 
-        </div>
+        {evaluation && (
 
-    )
+          <div
+            style={{
+              marginTop: 24,
+              padding: 20,
+              borderRadius: 12,
+              background: "#0f172a"
+            }}
+          >
+
+            <h3
+              style={{
+                color: "#22c55e"
+              }}
+            >
+              Score: {evaluation.score}/10
+            </h3>
+
+            <h4
+              style={{
+                color: "white"
+              }}
+            >
+              Strengths
+            </h4>
+
+            {evaluation.strengths.map(
+              (item, index) => (
+                <p
+                  key={index}
+                  style={{
+                    color: "#86efac"
+                  }}
+                >
+                  ✓ {item}
+                </p>
+              )
+            )}
+
+            <h4
+              style={{
+                color: "white",
+                marginTop: 16
+              }}
+            >
+              Improvements
+            </h4>
+
+            {evaluation.improvements.map(
+              (item, index) => (
+                <p
+                  key={index}
+                  style={{
+                    color: "#fca5a5"
+                  }}
+                >
+                  ✗ {item}
+                </p>
+              )
+            )}
+
+            <p
+              style={{
+                color: "#d1d5db",
+                marginTop: 16
+              }}
+            >
+              {evaluation.overallFeedback}
+            </p>
+
+            {currentQuestion <
+              questions.length - 1 && (
+
+              <button
+                onClick={() => {
+
+                  setCurrentQuestion(
+                    prev => prev + 1
+                  );
+
+                  setAnswer("");
+
+                  setEvaluation(
+                    null
+                  );
+
+                }}
+                style={{
+                  marginTop: 20
+                }}
+              >
+                Next Question
+              </button>
+
+            )}
+
+          </div>
+
+        )}
+
+      </div>
+
+    </div>
+
+  )
 }
 
                 </div>
