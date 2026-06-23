@@ -87,7 +87,7 @@ model InterviewSession {
   interviewType String
 
   questions Json
-
+report Json?
   createdAt DateTime @default(now())
 
   resumeId String

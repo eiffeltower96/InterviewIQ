@@ -2,6 +2,10 @@ const express = require("express");
 const authRoutes = require("./routes/authRoutes");
 const protect = require("./middleware/authMiddleware");
 const resumeRoutes = require("./routes/resumeRoutes");
+const interviewReportRoutes =
+require(
+"./routes/interviewReportRoutes"
+);
 const chatRoutes =
     require("./routes/chatRoutes");
 const companyAnalysisRoutes =
@@ -40,6 +44,7 @@ app.use(
     "/api/chat",
     chatRoutes
 );
+
 app.use(
     "/api/interview",
     interviewRoutes
@@ -47,6 +52,10 @@ app.use(
 app.use(
     "/api/interview/evaluate",
     interviewEvaluationRoutes
+);
+app.use(
+"/api/interview/report",
+interviewReportRoutes
 );
 app.use("/api/auth", authRoutes);
 app.use("/api/resume", resumeRoutes);
