@@ -7,6 +7,12 @@ const {
     "../services/interviewService"
 );
 
+const {
+    evaluateEntireInterview
+} = require(
+    "../services/interviewEvaluationService"
+);
+
 const startInterview =
 async (req, res) => {
 
@@ -61,6 +67,91 @@ async (req, res) => {
 
 };
 
+const submitInterview =
+async (req,res) => {
+
+    try {
+
+        const {
+            sessionId,
+            answers
+        } = req.body;
+
+        const session =
+        await prisma.interviewSession.findUnique({
+
+            where:{
+                id:sessionId
+            }
+
+        });
+
+        if(!session){
+
+            return res.status(404).json({
+
+                success:false,
+                message:
+                "Interview session not found"
+
+            });
+
+        }
+
+        const report =
+        await evaluateEntireInterview({
+
+            company:
+                session.company,
+
+            role:
+                session.role,
+
+            questions:
+                session.questions,
+
+            answers
+
+        });
+
+        await prisma.interviewSession.update({
+
+            where:{
+                id:sessionId
+            },
+
+            data:{
+                report
+            }
+
+        });
+
+        res.json({
+
+            success:true,
+            report
+
+        });
+
+    } catch(error){
+
+        console.error(error);
+
+        res.status(500).json({
+
+            success:false,
+            message:
+            "Failed to submit interview"
+
+        });
+
+    }
+
+};
+
 module.exports = {
-    startInterview
+
+    startInterview,
+    submitInterview
+
 };

@@ -1,16 +1,16 @@
 const model =
 require("../config/gemini");
 
-const evaluateAnswer =
-async (
-    question,
-    answer,
+const evaluateEntireInterview =
+async ({
     company,
-    role
-) => {
+    role,
+    questions,
+    answers
+}) => {
 
     const prompt = `
-You are a senior technical interviewer.
+You are a senior interviewer.
 
 Company:
 ${company}
@@ -18,34 +18,45 @@ ${company}
 Role:
 ${role}
 
-Interview Question:
+Evaluate this entire interview.
+
+${questions.map(
+(question,index)=>`
+
+Question ${index+1}:
 ${question}
 
-Candidate Answer:
-${answer}
+Answer:
+${answers[index]?.answer || ""}
+`
+).join("\n")}
 
-Evaluate the answer.
-
-Return ONLY valid JSON.
+Return ONLY JSON.
 
 {
-  "score": 0,
-  "strengths": [
+  "overallScore": 0,
+  "technicalScore": 0,
+  "communicationScore": 0,
+
+  "questionEvaluations":[
+    {
+      "questionNumber":1,
+      "score":0,
+      "feedback":""
+    }
+  ],
+
+  "strongestArea":"",
+  "weakestArea":"",
+
+  "recommendedTopics":[
+    "",
+    "",
     ""
   ],
-  "improvements": [
-    ""
-  ],
-  "overallFeedback": ""
+
+  "summary":""
 }
-
-Rules:
-
-- Score must be between 0 and 10.
-- Give exactly 2 strengths.
-- Give exactly 2 improvements.
-- Feedback should be concise.
-- Return only JSON.
 `;
 
     const result =
@@ -60,8 +71,8 @@ Rules:
 
     const cleaned =
         text
-            .replace(/```json/g, "")
-            .replace(/```/g, "")
+            .replace(/```json/g,"")
+            .replace(/```/g,"")
             .trim();
 
     return JSON.parse(
@@ -71,5 +82,5 @@ Rules:
 };
 
 module.exports = {
-    evaluateAnswer
+    evaluateEntireInterview
 };

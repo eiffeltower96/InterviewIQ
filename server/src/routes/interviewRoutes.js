@@ -5,7 +5,8 @@ const protect =
 require("../middleware/authMiddleware");
 
 const {
-    startInterview
+    startInterview,
+    submitInterview
 } = require(
     "../controllers/interviewController"
 );
@@ -18,6 +19,10 @@ router.post(
     protect,
     startInterview
 );
-
+router.post(
+    "/submit",
+    protect,
+    submitInterview
+);
 module.exports =
 router;
