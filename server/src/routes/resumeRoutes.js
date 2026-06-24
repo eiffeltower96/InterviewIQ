@@ -10,7 +10,9 @@ const {
 } = require('../controllers/resumeController');
 const {
     getResumeStudio,
-    rewriteResumeStudio
+    rewriteResumeStudio,
+    saveRewrittenResume,
+    downloadResume
 } = require(
     "../controllers/resumeStudioController"
 );
@@ -22,9 +24,19 @@ router.post(
     rewriteResumeStudio
 );
 router.get(
+    "/:id/download",
+    protect,
+    downloadResume
+);
+router.get(
     "/:id/studio",
     protect,
     getResumeStudio
+);
+router.put(
+    "/:id/save-rewrite",
+    protect,
+    saveRewrittenResume
 );
 router.post('/upload', protect, upload.single('resume'), uploadResume);
 router.get("/", protect, getUserResumes);

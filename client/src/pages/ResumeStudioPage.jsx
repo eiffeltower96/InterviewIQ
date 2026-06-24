@@ -75,6 +75,34 @@ async () => {
         console.error(error);
 
     }
+    
+
+        };
+    const handleSaveRewrite =
+async () => {
+
+    try {
+
+        await api.put(
+
+            `/resume/${id}/save-rewrite`,
+
+            {
+                rewrittenText:
+                    rewrittenResume
+            }
+
+        );
+
+        alert(
+            "Resume updated successfully"
+        );
+
+    } catch(error){
+
+        console.error(error);
+
+    }
 
 };
     return (
@@ -327,21 +355,26 @@ async () => {
     AI Rewrite Resume
 </button>
 
-                                        <button
-                                            style={{
-                                                width:
-                                                    "100%",
-                                                marginTop:
-                                                    12,
-                                                padding:
-                                                    12,
-                                                borderRadius:
-                                                    10
-                                            }}
-                                        >
-                                            Download Resume
-                                        </button>
+                                       <button
+    onClick={() => {
 
+        window.open(
+
+            `${import.meta.env.VITE_API_URL}/resume/${id}/download`,
+
+            "_blank"
+
+        );
+
+    }}
+>
+    Download Resume
+</button>
+                                        <button
+    onClick={handleSaveRewrite}
+>
+    Save Rewrite
+</button>
                                         
                                         {
     rewrittenResume && (
@@ -374,7 +407,8 @@ async () => {
         </div>
 
     )
-}
+                                        }
+                                        
                                     </div>
 
                                 </div>

@@ -1,6 +1,7 @@
 const prisma =
 require("../config/prisma");
-
+const PDFDocument =
+require("pdfkit");
 const getResumeStudio =
 async (req,res) => {
 
@@ -101,8 +102,89 @@ async (req,res) => {
 
     }
 
+    };
+const saveRewrittenResume =
+async (req,res) => {
+
+    try {
+
+        const {
+            rewrittenText
+        } = req.body;
+
+        const resume =
+        await prisma.resume.update({
+
+            where:{
+                id:req.params.id
+            },
+
+            data:{
+                extractedText:
+                    rewrittenText
+            }
+
+        });
+
+        res.json({
+
+            success:true,
+            resume
+
+        });
+
+    } catch(error){
+
+        console.error(error);
+
+        res.status(500).json({
+
+            success:false
+
+        });
+
+    }
+
+    };
+const downloadResume =
+async (req,res) => {
+
+    const resume =
+    await prisma.resume.findUnique({
+
+        where:{
+            id:req.params.id
+        }
+
+    });
+
+    const doc =
+    new PDFDocument();
+
+    res.setHeader(
+        "Content-Type",
+        "application/pdf"
+    );
+
+    res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=resume.pdf"
+    );
+
+    doc.pipe(res);
+
+    doc.fontSize(12);
+
+    doc.text(
+        resume.extractedText
+    );
+
+    doc.end();
+
 };
 module.exports = {
   getResumeStudio,
-  rewriteResumeStudio
+    rewriteResumeStudio,
+    saveRewrittenResume,
+    downloadResume
 };
