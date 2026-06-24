@@ -25,9 +25,14 @@ const protect = (req,res,next) => {
             authHeader.split(" ")[1];
 
         console.log(
-            "TOKEN:",
-            token
-        );
+    "PATH:",
+    req.originalUrl
+);
+
+console.log(
+    "TOKEN:",
+    token.substring(0, 30)
+);
 
         console.log(
             "JWT_SECRET:",
@@ -44,7 +49,10 @@ const protect = (req,res,next) => {
             "DECODED:",
             decoded
         );
-
+console.log(
+    "EXP:",
+    decoded?.exp
+);
         req.user = decoded;
 
         next();
@@ -55,7 +63,10 @@ const protect = (req,res,next) => {
             "JWT ERROR:",
             error
         );
-
+console.log(
+    "FAILED PATH:",
+    req.originalUrl
+);
         return res.status(401).json({
             success:false,
             message:"Invalid token"
