@@ -8,9 +8,24 @@ const {
     deleteResume,
     getProfileResumes
 } = require('../controllers/resumeController');
+const {
+    getResumeStudio,
+    rewriteResumeStudio
+} = require(
+    "../controllers/resumeStudioController"
+);
 
 const router = express.Router();
-
+router.post(
+    "/:id/rewrite",
+    protect,
+    rewriteResumeStudio
+);
+router.get(
+    "/:id/studio",
+    protect,
+    getResumeStudio
+);
 router.post('/upload', protect, upload.single('resume'), uploadResume);
 router.get("/", protect, getUserResumes);
 router.get("/history",
