@@ -4,6 +4,11 @@ require("../config/prisma");
 const getResumeStudio =
 async (req,res) => {
 
+    console.log(
+        "GET RESUME STUDIO HIT",
+        req.params.id
+    );
+
     try {
 
         const resume =
@@ -15,11 +20,17 @@ async (req,res) => {
 
         });
 
+        console.log(
+            "RESUME:",
+            resume
+        );
+
         if(!resume){
 
             return res.status(404).json({
 
-                success:false
+                success:false,
+                message:"Resume not found"
 
             });
 
@@ -28,7 +39,6 @@ async (req,res) => {
         res.json({
 
             success:true,
-
             resume
 
         });

@@ -30,6 +30,7 @@ useState("");
             async () => {
 
                 try {
+                    console.log("RESUME ID:", id);
 
                     const response =
                         await api.get(
