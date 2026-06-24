@@ -25,12 +25,38 @@ async (req, res) => {
             interviewType
         } = req.body;
 
-        const result =
-            await generateInterviewQuestions(
-                company,
-                role,
-                interviewType
-            );
+       const resume =
+    await prisma.resume.findUnique({
+
+        where: {
+            id: resumeId
+        }
+
+    });
+
+if (!resume) {
+
+    return res.status(404).json({
+
+        success: false,
+        message: "Resume not found"
+
+    });
+
+}
+
+const result =
+    await generateInterviewQuestions(
+
+        company,
+
+        role,
+
+        interviewType,
+
+        resume.extractedText
+
+    );
 
         const session =
             await prisma.interviewSession.create({
