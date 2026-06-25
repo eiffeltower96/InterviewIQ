@@ -30,7 +30,6 @@ useState("");
             async () => {
 
                 try {
-                    console.log("RESUME ID:", id);
 
                     const response =
                         await api.get(
@@ -97,6 +96,51 @@ async () => {
         alert(
             "Resume updated successfully"
         );
+
+    } catch(error){
+
+        console.error(error);
+
+    }
+
+        };
+    const handleDownload = async () => {
+
+    try {
+
+        const response =
+        await api.get(
+
+            `/resume/${id}/download`,
+
+            {
+                responseType: "blob"
+            }
+
+        );
+
+        const url =
+        window.URL.createObjectURL(
+            new Blob([response.data])
+        );
+
+        const link =
+        document.createElement("a");
+
+        link.href = url;
+
+        link.setAttribute(
+            "download",
+            "resume.pdf"
+        );
+
+        document.body.appendChild(
+            link
+        );
+
+        link.click();
+
+        link.remove();
 
     } catch(error){
 
@@ -356,17 +400,9 @@ async () => {
 </button>
 
                                        <button
-    onClick={() => {
-
-        window.open(
-
-            `${import.meta.env.VITE_API_URL}/resume/${id}/download`,
-
-            "_blank"
-
-        );
-
-    }}
+    onClick={
+        handleDownload
+    }
 >
     Download Resume
 </button>
