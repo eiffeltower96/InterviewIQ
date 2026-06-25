@@ -1,1 +1,92 @@
 @import "tailwindcss";
+
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-500.css";
+@import "@fontsource/inter/latin-600.css";
+@import "@fontsource/inter/latin-700.css";
+@import "@fontsource/jetbrains-mono/latin-400.css";
+@import "@fontsource/jetbrains-mono/latin-500.css";
+
+/*
+  InterviewIQ design tokens.
+
+  One brand hue (indigo), everything else neutral gray.
+  Semantic color is reserved for success / error / warning only —
+  no rainbow, no per-feature accent colors, no glow shadows.
+*/
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* Brand — single hue, used deliberately and sparingly */
+  --color-brand-50: #eef0ff;
+  --color-brand-100: #e0e3ff;
+  --color-brand-200: #c5cbff;
+  --color-brand-300: #a3acfd;
+  --color-brand-400: #7c87f7;
+  --color-brand-500: #5660ef;
+  --color-brand-600: #4148d6;
+  --color-brand-700: #3437ad;
+  --color-brand-800: #2b2e88;
+  --color-brand-900: #25266b;
+
+  /* Neutrals — true gray, no navy/violet tint */
+  --color-canvas: #09090b;
+  --color-surface: #0f0f11;
+  --color-surface-raised: #151517;
+  --color-border: #232326;
+  --color-border-strong: #2e2e32;
+
+  --color-ink-primary: #f2f2f3;
+  --color-ink-secondary: #a1a1aa;
+  --color-ink-tertiary: #71717a;
+  --color-ink-quaternary: #4b4b51;
+
+  /* Semantic — flat, no glow */
+  --color-success: #22c55e;
+  --color-success-bg: #132619;
+  --color-success-border: #1f3d28;
+
+  --color-error: #f87171;
+  --color-error-bg: #2a1616;
+  --color-error-border: #432323;
+
+  --color-warning: #eab308;
+  --color-warning-bg: #2a2310;
+  --color-warning-border: #433a1c;
+
+  /* Radius scale — small and consistent, never "giant rounded rectangle" */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+}
+
+html {
+  background: var(--color-canvas);
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-canvas);
+  color: var(--color-ink-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+::selection {
+  background: var(--color-brand-700);
+  color: white;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
