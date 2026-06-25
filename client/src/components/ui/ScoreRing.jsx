@@ -1,19 +1,5 @@
 import { motion } from "framer-motion";
-
-const toneColor = {
-  success: "var(--color-success)",
-  warning: "var(--color-warning)",
-  error: "var(--color-error)",
-  brand: "var(--color-brand-400)",
-  neutral: "var(--color-ink-quaternary)",
-};
-
-export function scoreTone(score) {
-  if (score === null || score === undefined) return "neutral";
-  if (score >= 80) return "success";
-  if (score >= 60) return "warning";
-  return "error";
-}
+import { scoreTone, toneColor } from "./scoreTone";
 
 /**
  * ScoreRing

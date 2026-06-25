@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const variantClasses = {
   primary:
@@ -18,6 +19,12 @@ const sizeClasses = {
   lg: "h-10 px-4.5 text-sm gap-2 rounded-lg",
 };
 
+const iconOnlySizeClasses = {
+  sm: "h-7 w-7 rounded-md",
+  md: "h-9 w-9 rounded-lg",
+  lg: "h-10 w-10 rounded-lg",
+};
+
 /**
  * Button
  * Flat fills, hairline borders, no gradients or glow shadows.
@@ -33,19 +40,39 @@ const Button = forwardRef(function Button(
     loading = false,
     disabled = false,
     className = "",
+    to,
+    href,
     as,
     ...props
   },
   ref
 ) {
   const isDisabled = disabled || loading;
-  const Component = as === "span" ? motion.span : motion.button;
+  const isIconOnly = !children && (icon || loading);
+
+  // Polymorphic rendering: `to` → router Link, `href` → anchor, else a real
+  // <button>. This keeps the full padded box clickable (no nested <a> inside
+  // a styled wrapper with its own separate hit area).
+  let Component = motion.button;
+  let extraProps = {
+    type: props.type || "button",
+    disabled: isDisabled,
+  };
+
+  if (to && !isDisabled) {
+    Component = motion(Link);
+    extraProps = { to };
+  } else if (href && !isDisabled) {
+    Component = motion.a;
+    extraProps = { href };
+  } else if (as === "span") {
+    Component = motion.span;
+    extraProps = {};
+  }
 
   return (
     <Component
       ref={ref}
-      type={as ? undefined : props.type || "button"}
-      disabled={as ? undefined : isDisabled}
       aria-disabled={isDisabled}
       whileTap={isDisabled ? undefined : { scale: 0.97 }}
       transition={{ duration: 0.12 }}
@@ -55,9 +82,10 @@ const Button = forwardRef(function Button(
         transition-colors duration-150
         disabled:cursor-not-allowed
         ${variantClasses[variant]}
-        ${sizeClasses[size]}
+        ${isIconOnly ? iconOnlySizeClasses[size] : sizeClasses[size]}
         ${className}
       `}
+      {...extraProps}
       {...props}
     >
       {loading ? (

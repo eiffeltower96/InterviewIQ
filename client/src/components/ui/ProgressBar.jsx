@@ -1,13 +1,5 @@
 import { motion } from "framer-motion";
-import { scoreTone } from "./ScoreRing";
-
-const toneColor = {
-  success: "var(--color-success)",
-  warning: "var(--color-warning)",
-  error: "var(--color-error)",
-  brand: "var(--color-brand-400)",
-  neutral: "var(--color-ink-quaternary)",
-};
+import { scoreTone, toneColor } from "./scoreTone";
 
 /**
  * ProgressBar
