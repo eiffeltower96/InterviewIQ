@@ -6,13 +6,13 @@ import { scoreTone, toneColor } from "./scoreTone";
  * Linear equivalent of ScoreRing — used for category breakdowns
  * (Dream Company category scores, ATS score bar). Flat fill, no glow.
  */
-function ProgressBar({ value, tone, label, showValue = true, height = 6 }) {
+function ProgressBar({ value, tone, label, showValue = true, height = 6, className = "" }) {
   const resolvedTone = tone || scoreTone(value);
   const color = toneColor[resolvedTone];
   const pct = Math.max(0, Math.min(100, value ?? 0));
 
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       {(label || showValue) && (
         <div className="flex items-center justify-between mb-1.5 text-[13px]">
           {label && <span className="text-ink-secondary">{label}</span>}
