@@ -36,6 +36,7 @@ function Composer({ value, onChange, onSend, activeMode, disabled }) {
         <div className="rounded-2xl border border-border-strong bg-white/[0.03] p-3 flex flex-col gap-2">
           <div className="flex items-end gap-2.5">
             <textarea
+              autoFocus
               ref={textareaRef}
               value={value}
               onChange={handleInput}

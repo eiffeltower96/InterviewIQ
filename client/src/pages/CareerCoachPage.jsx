@@ -278,21 +278,26 @@ function CareerCoachPage() {
             {score !== undefined && <Badge tone="brand">ATS {score}</Badge>}
           </div>
 
-          {/* Conversation / empty state */}
-          {messages.length === 0 ? (
-            <CoachEmptyState resume={resume} onSelectPrompt={(p) => sendMessage(p)} />
-          ) : (
-            <MessageList messages={messages} />
-          )}
+          <div className="flex-1 flex flex-col overflow-hidden">
 
-          {/* Composer */}
-          <Composer
-            value={draft}
-            onChange={setDraft}
-            onSend={() => sendMessage()}
-            activeMode={activeMode}
-            disabled={isSending}
-          />
+    {messages.length === 0 ? (
+        <CoachEmptyState
+            resume={resume}
+            onSelectPrompt={(p) => sendMessage(p)}
+        />
+    ) : (
+        <MessageList messages={messages} />
+    )}
+
+</div>
+
+<Composer
+    value={draft}
+    onChange={setDraft}
+    onSend={() => sendMessage()}
+    activeMode={activeMode}
+    disabled={isSending}
+/>
         </div>
       </div>
     </DashboardLayout>
