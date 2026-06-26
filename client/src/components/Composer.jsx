@@ -1,12 +1,12 @@
 import { useRef } from "react";
-import { COACH_MODES } from "./CoachSidebar";
+import { COACH_MODES } from "./coachModes";
 
 /**
  * Composer
- * Fixed at the bottom of the conversation column (not the viewport, so it
- * respects the sidebar on desktop). Shows the active mode as a small pill
- * inside the input so switching to "Resume Roast" etc. has a visible,
- * persistent indicator of which persona is answering.
+ * Same auto-growing textarea (manual style.height manipulation, capped at
+ * 160px) and same Enter-to-send / Shift+Enter-for-newline behavior as
+ * before. The active mode still renders as a label only — it isn't sent
+ * to the backend, matching the existing CareerCoachPage behavior.
  */
 function Composer({ value, onChange, onSend, activeMode, disabled }) {
   const textareaRef = useRef(null);
@@ -28,27 +28,13 @@ function Composer({ value, onChange, onSend, activeMode, disabled }) {
     }
   };
 
+  const canSend = value.trim() && !disabled;
+
   return (
-    <div
-      style={{
-        borderTop: "1px solid rgba(255,255,255,0.06)",
-        background: "linear-gradient(180deg, transparent, #0d0c14 30%)",
-        padding: "16px 24px 20px",
-      }}
-    >
-      <div style={{ maxWidth: 720, margin: "0 auto" }}>
-        <div
-          style={{
-            borderRadius: 18,
-            border: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(255,255,255,0.03)",
-            padding: "10px 12px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
+    <div className="border-t border-border px-6 pt-4 pb-5" style={{ background: "linear-gradient(180deg, transparent, var(--color-surface) 30%)" }}>
+      <div className="max-w-[720px] mx-auto">
+        <div className="rounded-2xl border border-border-strong bg-white/[0.03] p-3 flex flex-col gap-2">
+          <div className="flex items-end gap-2.5">
             <textarea
               ref={textareaRef}
               value={value}
@@ -56,37 +42,16 @@ function Composer({ value, onChange, onSend, activeMode, disabled }) {
               onKeyDown={handleKeyDown}
               placeholder={`Ask your ${mode.label.toLowerCase()}...`}
               rows={1}
-              style={{
-                flex: 1,
-                resize: "none",
-                background: "transparent",
-                border: "none",
-                outline: "none",
-                color: "#f3f4f6",
-                fontSize: 14.5,
-                fontFamily: "inherit",
-                lineHeight: 1.5,
-                padding: "6px 4px",
-                maxHeight: 160,
-              }}
+              className="flex-1 resize-none bg-transparent border-none outline-none text-ink-primary text-[14.5px] leading-relaxed py-1.5 px-1 font-sans max-h-40"
             />
             <button
               onClick={onSend}
-              disabled={!value.trim() || disabled}
-              style={{
-                flexShrink: 0,
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                border: "none",
-                background: value.trim() && !disabled ? "#a78bfa" : "rgba(255,255,255,0.06)",
-                color: value.trim() && !disabled ? "#13111c" : "#4b5563",
-                cursor: value.trim() && !disabled ? "pointer" : "default",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "background 0.15s ease",
-              }}
+              disabled={!canSend}
+              className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-colors duration-150 ${
+                canSend
+                  ? "bg-brand-500 text-white hover:bg-brand-600 cursor-pointer"
+                  : "bg-white/[0.06] text-ink-quaternary cursor-default"
+              }`}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                 <path
@@ -94,27 +59,18 @@ function Composer({ value, onChange, onSend, activeMode, disabled }) {
                   stroke="currentColor"
                   strokeWidth="1.8"
                   strokeLinejoin="round"
-                  fill={value.trim() && !disabled ? "#13111c" : "none"}
+                  fill={canSend ? "currentColor" : "none"}
                 />
               </svg>
             </button>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px" }}>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-                fontSize: 11,
-                fontWeight: 600,
-                color: "#6d28d9",
-              }}
-            >
-              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#a78bfa" }} />
+          <div className="flex items-center justify-between px-1">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-brand-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
               {mode.label}
             </span>
-            <span style={{ fontSize: 11, color: "#4b5563" }}>Enter to send · Shift+Enter for new line</span>
+            <span className="text-[11px] text-ink-quaternary">Enter to send · Shift+Enter for new line</span>
           </div>
         </div>
       </div>

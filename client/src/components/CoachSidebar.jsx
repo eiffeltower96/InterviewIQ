@@ -1,69 +1,13 @@
 import { useState } from "react";
-
-/**
- * Future-feature modes. Each mode swaps the system prompt server-side and
- * changes the suggested follow-ups — this list is the seam where
- * "Dream Company Match," "Resume Roast," etc. plug in later without any
- * layout change, only new entries here + a backend prompt.
- */
-export const COACH_MODES = [
-  {
-    id: "general",
-    label: "Career Coach",
-    description: "Ask anything about your resume",
-    icon: "spark",
-    available: true,
-  },
-  {
-    id: "roast",
-    label: "Resume Roast",
-    description: "Brutally honest, no sugar-coating",
-    icon: "flame",
-    available: true,
-  },
-  {
-    id: "ats",
-    label: "ATS Improvement",
-    description: "Get past the filters",
-    icon: "filter",
-    available: true,
-  },
-  {
-    id: "interview",
-    label: "Interview Prep",
-    description: "Practice for your next round",
-    icon: "mic",
-    available: false,
-  },
-  {
-    id: "dream-match",
-    label: "Dream Company Match",
-    description: "See where you fit best",
-    icon: "target",
-    available: false,
-  },
-  {
-    id: "roadmap",
-    label: "Career Roadmap",
-    description: "Your path to the next level",
-    icon: "map",
-    available: false,
-  },
-];
+import { motion, AnimatePresence } from "framer-motion";
+import Modal from "./ui/Modal";
+import { IconPlus, IconChevronLeft, IconTrash } from "./ui/icons";
+import { COACH_MODES } from "./coachModes";
 
 const ICONS = {
-  spark: (
-    <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill="currentColor" />
-  ),
-  flame: (
-    <path
-      d="M12 2c1 3-3 4-3 7a3 3 0 006 0c1-1 1-2 0-3 1.5.5 3 2.5 3 5a6 6 0 11-12 0c0-4 3-6 6-9z"
-      fill="currentColor"
-    />
-  ),
-  filter: (
-    <path d="M4 5h16M7 12h10M10 19h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  ),
+  spark: <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill="currentColor" />,
+  flame: <path d="M12 2c1 3-3 4-3 7a3 3 0 006 0c1-1 1-2 0-3 1.5.5 3 2.5 3 5a6 6 0 11-12 0c0-4 3-6 6-9z" fill="currentColor" />,
+  filter: <path d="M4 5h16M7 12h10M10 19h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />,
   mic: (
     <>
       <rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" />
@@ -77,18 +21,10 @@ const ICONS = {
       <circle cx="12" cy="12" r="1" fill="currentColor" />
     </>
   ),
-  map: (
-    <path
-      d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z M9 4v14M15 6v14"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  ),
+  map: <path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z M9 4v14M15 6v14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />,
 };
 
-function ModeIcon({ name, size = 16 }) {
+function ModeIcon({ name, size = 14 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       {ICONS[name]}
@@ -98,9 +34,11 @@ function ModeIcon({ name, size = 16 }) {
 
 /**
  * CoachSidebar
- * Desktop-only persistent panel. Mirrors the dark surface + violet accent
- * language from the report cards. Collapsible to give the conversation
- * area room on smaller laptop screens.
+ * Same props and behavior as before: collapsible desktop panel, mode
+ * shortcuts (visual only — selection doesn't change the API call, same
+ * as before this redesign), and conversation history with delete. The
+ * delete confirmation now goes through the Modal primitive instead of
+ * window.confirm.
  */
 function CoachSidebar({
   collapsed,
@@ -113,204 +51,98 @@ function CoachSidebar({
   onNewConversation,
   onDeleteConversation,
 }) {
-  console.log(
-  "onDeleteConversation:",
-  onDeleteConversation
-);
-  const [hoveredMode, setHoveredMode] = useState(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
   if (collapsed) {
     return (
-      <div
-        style={{
-          width: 60,
-          flexShrink: 0,
-          borderRight: "1px solid rgba(255,255,255,0.06)",
-          background: "#0d0c14",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          paddingTop: 16,
-          gap: 12,
-        }}
-      >
+      <div className="w-[60px] shrink-0 border-r border-border bg-surface flex flex-col items-center pt-4 gap-3">
         <button
           onClick={onToggleCollapse}
           title="Expand sidebar"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(255,255,255,0.03)",
-            color: "#9ca3af",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-          }}
+          className="w-9 h-9 rounded-lg border border-border-strong bg-white/[0.03] text-ink-tertiary flex items-center justify-center hover:text-ink-secondary transition-colors"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M9 4l8 8-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <IconChevronLeft className="w-4 h-4 rotate-180" />
         </button>
         <button
           onClick={onNewConversation}
           title="New conversation"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            border: "1px solid rgba(167,139,250,0.3)",
-            background: "rgba(167,139,250,0.12)",
-            color: "#a78bfa",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-          }}
+          className="w-9 h-9 rounded-lg border border-brand-500/30 bg-brand-500/10 text-brand-300 flex items-center justify-center hover:bg-brand-500/15 transition-colors"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
+          <IconPlus className="w-4 h-4" />
         </button>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        width: 272,
-        flexShrink: 0,
-        borderRight: "1px solid rgba(255,255,255,0.06)",
-        background: "#0d0c14",
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-      }}
-    >
+    <div className="w-[272px] shrink-0 border-r border-border bg-surface flex flex-col h-full">
       {/* Header */}
-      <div style={{ padding: "16px 14px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div
-            style={{
-              width: 7,
-              height: 7,
-              borderRadius: "50%",
-              background: "#a78bfa",
-              boxShadow: "0 0 8px #a78bfa",
-            }}
-          />
-          <span style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#6d28d9" }}>
+      <div className="px-3.5 pt-4 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-brand-300">
             Career Coach
           </span>
         </div>
         <button
           onClick={onToggleCollapse}
           title="Collapse sidebar"
-          style={{ background: "transparent", border: "none", color: "#6b7280", cursor: "pointer", padding: 4 }}
+          className="text-ink-quaternary hover:text-ink-secondary transition-colors p-1"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M15 4l-8 8 8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <IconChevronLeft className="w-4 h-4" />
         </button>
       </div>
 
       {/* New conversation */}
-      <div style={{ padding: "4px 14px 14px" }}>
+      <div className="px-3.5 pb-3.5">
         <button
           onClick={onNewConversation}
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            background: "#a78bfa",
-            color: "#13111c",
-            fontWeight: 700,
-            fontSize: 13.5,
-            border: "none",
-            borderRadius: 10,
-            padding: "10px 0",
-            cursor: "pointer",
-          }}
+          className="w-full flex items-center justify-center gap-2 h-9 rounded-lg bg-brand-500 text-white text-[13px] font-semibold hover:bg-brand-600 transition-colors"
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
+          <IconPlus className="w-3.5 h-3.5" />
           New conversation
         </button>
       </div>
 
       {/* Mode shortcuts */}
-      <div style={{ padding: "0 10px" }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: "#4b5563", letterSpacing: "0.06em", textTransform: "uppercase", padding: "8px 8px 6px" }}>
+      <div className="px-2.5">
+        <div className="text-[11px] font-semibold uppercase tracking-wide text-ink-quaternary px-2 pt-2 pb-1.5">
           Modes
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <div className="flex flex-col gap-0.5">
           {COACH_MODES.map((mode) => {
             const isActive = activeMode === mode.id;
-            const isHovered = hoveredMode === mode.id;
             return (
               <button
                 key={mode.id}
                 disabled={!mode.available}
                 onClick={() => mode.available && onSelectMode(mode.id)}
-                onMouseEnter={() => setHoveredMode(mode.id)}
-                onMouseLeave={() => setHoveredMode(null)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  width: "100%",
-                  textAlign: "left",
-                  padding: "8px 8px",
-                  borderRadius: 9,
-                  border: "none",
-                  background: isActive ? "rgba(167,139,250,0.12)" : isHovered && mode.available ? "rgba(255,255,255,0.04)" : "transparent",
-                  cursor: mode.available ? "pointer" : "default",
-                  opacity: mode.available ? 1 : 0.45,
-                }}
+                className={`
+                  flex items-center gap-2.5 w-full text-left px-2 py-2 rounded-md
+                  transition-colors duration-150
+                  ${mode.available ? "cursor-pointer" : "cursor-default opacity-45"}
+                  ${isActive ? "bg-brand-500/[0.1]" : mode.available ? "hover:bg-white/[0.04]" : ""}
+                `}
               >
                 <div
-                  style={{
-                    flexShrink: 0,
-                    width: 26,
-                    height: 26,
-                    borderRadius: 7,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: isActive ? "rgba(167,139,250,0.18)" : "rgba(255,255,255,0.04)",
-                    color: isActive ? "#a78bfa" : "#9ca3af",
-                  }}
+                  className={`shrink-0 w-[26px] h-[26px] rounded-md flex items-center justify-center ${
+                    isActive ? "bg-brand-500/20 text-brand-300" : "bg-white/[0.04] text-ink-tertiary"
+                  }`}
                 >
-                  <ModeIcon name={mode.icon} size={14} />
+                  <ModeIcon name={mode.icon} />
                 </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: isActive ? "#fff" : "#d1d5db" }}>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[13px] font-medium ${isActive ? "text-ink-primary" : "text-ink-secondary"}`}>
                       {mode.label}
                     </span>
                     {!mode.available && (
-                      <span
-                        style={{
-                          fontSize: 9,
-                          fontWeight: 700,
-                          color: "#6b7280",
-                          background: "rgba(255,255,255,0.06)",
-                          borderRadius: 4,
-                          padding: "1px 5px",
-                          letterSpacing: "0.04em",
-                        }}
-                      >
+                      <span className="text-[9px] font-semibold tracking-wide text-ink-quaternary bg-white/[0.06] rounded px-1 py-px">
                         SOON
                       </span>
                     )}
                   </div>
-                  <div style={{ fontSize: 11, color: "#6b7280", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div className="text-[11px] text-ink-quaternary mt-0.5 truncate">
                     {mode.description}
                   </div>
                 </div>
@@ -321,100 +153,66 @@ function CoachSidebar({
       </div>
 
       {/* Conversation history */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "14px 10px", marginTop: 4 }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: "#4b5563", letterSpacing: "0.06em", textTransform: "uppercase", padding: "0 8px 8px" }}>
+      <div className="flex-1 overflow-y-auto px-2.5 py-3.5 mt-1">
+        <div className="text-[11px] font-semibold uppercase tracking-wide text-ink-quaternary px-2 pb-2">
           History
         </div>
         {conversations.length === 0 ? (
-          <p style={{ fontSize: 12.5, color: "#4b5563", padding: "4px 8px", lineHeight: 1.5 }}>
+          <p className="text-[12.5px] text-ink-quaternary px-2 leading-relaxed">
             Your conversations about this resume will show up here.
           </p>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {conversations.map((conv) => {
-              const isActive = conv.id === activeConversationId;
-              return (
-                <div
-  key={conv.id}
-  style={{
-    position: "relative",
-  }}
->
-  <button
-    onClick={() => onSelectConversation(conv.id)}
-    style={{
-      textAlign: "left",
-      width: "100%",
-      padding: "9px 36px 9px 10px",
-      borderRadius: 9,
-      border: "none",
-      background: isActive
-        ? "rgba(255,255,255,0.06)"
-        : "transparent",
-      cursor: "pointer",
-    }}
-  >
-    <div
-      style={{
-        fontSize: 13,
-        fontWeight: 500,
-        color: isActive
-          ? "#fff"
-          : "#9ca3af",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {conv.title}
-    </div>
-
-    <div
-      style={{
-        fontSize: 11,
-        color: "#4b5563",
-        marginTop: 2,
-      }}
-    >
-      {conv.timeLabel}
-    </div>
-  </button>
-
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-
-      if (
-        window.confirm(
-          "Delete this conversation?"
-        )
-      ) {
-        onDeleteConversation(
-          conv.id
-        );
-      }
-    }}
-    style={{
-      position: "absolute",
-      right: 8,
-      top: "50%",
-      transform:
-        "translateY(-50%)",
-      background: "transparent",
-      border: "none",
-      color: "#6b7280",
-      cursor: "pointer",
-      fontSize: 14,
-    }}
-  >
-    🗑️
-  </button>
-</div>
-              );
-            })}
+          <div className="flex flex-col gap-0.5">
+            <AnimatePresence initial={false}>
+              {conversations.map((conv) => {
+                const isActive = conv.id === activeConversationId;
+                return (
+                  <motion.div
+                    key={conv.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="relative group"
+                  >
+                    <button
+                      onClick={() => onSelectConversation(conv.id)}
+                      className={`w-full text-left pl-2.5 pr-8 py-2 rounded-md transition-colors ${
+                        isActive ? "bg-white/[0.06]" : "hover:bg-white/[0.03]"
+                      }`}
+                    >
+                      <div className={`text-[13px] font-medium truncate ${isActive ? "text-ink-primary" : "text-ink-secondary"}`}>
+                        {conv.title}
+                      </div>
+                      {conv.timeLabel && (
+                        <div className="text-[11px] text-ink-quaternary mt-0.5">{conv.timeLabel}</div>
+                      )}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPendingDeleteId(conv.id);
+                      }}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-ink-quaternary opacity-0 group-hover:opacity-100 hover:text-error hover:bg-error-bg transition-all"
+                      aria-label="Delete conversation"
+                    >
+                      <IconTrash className="w-3.5 h-3.5" />
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         )}
       </div>
+
+      <Modal
+        open={!!pendingDeleteId}
+        onClose={() => setPendingDeleteId(null)}
+        onConfirm={() => onDeleteConversation(pendingDeleteId)}
+        title="Delete this conversation?"
+        description="This will permanently remove the conversation history. This can't be undone."
+        confirmLabel="Delete"
+      />
     </div>
   );
 }

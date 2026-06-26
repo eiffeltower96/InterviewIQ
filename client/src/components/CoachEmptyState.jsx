@@ -1,10 +1,11 @@
+import { motion } from "framer-motion";
+
 /**
  * CoachEmptyState
- * The single highest-leverage screen in this feature. A generic "Ask me
- * anything" empty state is what makes an AI feature feel bolted-on.
- * Here every prompt is generated from the resume's own analysis, so the
- * first thing a first-time user sees is proof the assistant already
- * read their report.
+ * Same dynamic-prompt logic as before: every starter prompt is generated
+ * from the resume's own analysis fields (atsScore, weaknesses[0],
+ * missingKeywords[0], strengths[0]) with the same fallback copy when a
+ * field is missing. onSelectPrompt contract unchanged.
  */
 function CoachEmptyState({ resume, onSelectPrompt }) {
   const score = resume?.analysis?.atsScore;
@@ -14,28 +15,25 @@ function CoachEmptyState({ resume, onSelectPrompt }) {
 
   const prompts = [
     {
-      icon: "trend",
       label: "Explain my score",
-      prompt: score !== undefined
-        ? `Why is my ATS score ${score}, and what would move it up fastest?`
-        : "What does my ATS score mean and how can I improve it?",
+      prompt:
+        score !== undefined
+          ? `Why is my ATS score ${score}, and what would move it up fastest?`
+          : "What does my ATS score mean and how can I improve it?",
     },
     {
-      icon: "fix",
       label: "Fix my biggest weakness",
       prompt: weakness
         ? `How do I fix this weakness: "${weakness}"?`
         : "What's the single biggest weakness in my resume?",
     },
     {
-      icon: "keyword",
       label: "Add missing keywords",
       prompt: missingKeyword
         ? `How do I naturally add "${missingKeyword}" to my resume without keyword-stuffing?`
         : "How do I add missing keywords without sounding stuffed?",
     },
     {
-      icon: "target",
       label: "Find my best-fit role",
       prompt: strength
         ? `Given my strength in "${strength}", which roles should I target?`
@@ -44,104 +42,45 @@ function CoachEmptyState({ resume, onSelectPrompt }) {
   ];
 
   return (
-    <div
-      style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "40px 20px",
-        textAlign: "center",
-      }}
-    >
-      {/* Mark — same spark glyph + glow language as the CTA badge */}
-      <div
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: 16,
-          background: "rgba(167,139,250,0.1)",
-          border: "1px solid rgba(167,139,250,0.28)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: 20,
-          boxShadow: "0 0 32px rgba(167,139,250,0.22)",
-        }}
+    <div className="flex-1 flex flex-col items-center justify-center px-5 py-10 text-center">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="w-14 h-14 rounded-xl bg-brand-500/10 border border-brand-500/25 flex items-center justify-center mb-5"
       >
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill="#a78bfa" />
+          <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill="var(--color-brand-400)" />
         </svg>
-      </div>
+      </motion.div>
 
-      <h2
-        style={{
-          fontSize: 24,
-          fontWeight: 800,
-          color: "#fff",
-          margin: 0,
-          letterSpacing: "-0.02em",
-        }}
-      >
-        {resume ? `Let's talk about your resume` : "Your AI Career Coach"}
+      <h2 className="text-2xl font-semibold text-ink-primary tracking-tight">
+        {resume ? "Let's talk about your resume" : "Your AI Career Coach"}
       </h2>
-      <p style={{ fontSize: 14.5, color: "#6b7280", marginTop: 8, maxWidth: 420, lineHeight: 1.6 }}>
+      <p className="text-[14.5px] text-ink-tertiary mt-2 max-w-[420px] leading-relaxed">
         {score !== undefined
-          ? `I've read your analysis — score of ${score} with ${resume?.analysis?.missingKeywords?.length || 0} keyword gaps. Ask me anything, or start here:`
+          ? `I've read your analysis — score of ${score} with ${
+              resume?.analysis?.missingKeywords?.length || 0
+            } keyword gaps. Ask me anything, or start here:`
           : "Ask me anything about your resume, your fit for a role, or how to improve your score."}
       </p>
 
-      {/* Starter prompts grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: 10,
-          marginTop: 28,
-          width: "100%",
-          maxWidth: 640,
-        }}
-      >
-        {prompts.map((p) => (
-          <button
+      <div className="grid sm:grid-cols-2 gap-2.5 mt-7 w-full max-w-[640px]">
+        {prompts.map((p, i) => (
+          <motion.button
             key={p.label}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: i * 0.05 }}
+            whileHover={{ y: -1 }}
             onClick={() => onSelectPrompt(p.prompt)}
-            style={{
-              textAlign: "left",
-              padding: "14px 16px",
-              borderRadius: 14,
-              border: "1px solid rgba(255,255,255,0.08)",
-              background: "rgba(255,255,255,0.02)",
-              cursor: "pointer",
-              transition: "border-color 0.15s ease, background 0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "rgba(167,139,250,0.4)";
-              e.currentTarget.style.background = "rgba(167,139,250,0.06)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-              e.currentTarget.style.background = "rgba(255,255,255,0.02)";
-            }}
+            className="text-left p-4 rounded-xl border border-border bg-white/[0.015] hover:border-brand-500/30 hover:bg-brand-500/[0.04] transition-colors duration-150"
           >
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#e5e7eb", marginBottom: 4 }}>
-              {p.label}
-            </div>
-            <div
-              style={{
-                fontSize: 12.5,
-                color: "#6b7280",
-                lineHeight: 1.45,
-                overflow: "hidden",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-              }}
-            >
+            <div className="text-[13px] font-semibold text-ink-primary mb-1">{p.label}</div>
+            <div className="text-[12.5px] text-ink-tertiary leading-relaxed line-clamp-2">
               {p.prompt}
             </div>
-          </button>
+          </motion.button>
         ))}
       </div>
     </div>
