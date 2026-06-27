@@ -1,364 +1,174 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import api from "../services/api";
 import DashboardLayout from "../layouts/DashboardLayout";
+import { SectionHeader, Panel, Textarea, Button, IconUpload, IconSparkle, IconLock, IconX, IconPaperclip } from "../components/ui";
+
+const STEPS = [
+  { icon: <IconUpload />, label: "Upload PDF" },
+  { icon: <IconSparkle />, label: "AI parsing" },
+  { icon: <IconSparkle />, label: "ATS score" },
+];
 
 function UploadResume() {
-    const navigate = useNavigate();
-    const [file, setFile] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [loadingText, setLoadingText] = useState("");
-    const [jobDescription, setJobDescription] = useState("");
-    const [dragOver, setDragOver] = useState(false);
+  const navigate = useNavigate();
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [dragOver, setDragOver] = useState(false);
+  const [error, setError] = useState("");
 
-    const handleUpload = async () => {
-        if (!file) {
-            alert("Please select a PDF resume");
-            return;
-        }
-        try {
-            setLoading(true);
-            const formData = new FormData();
-            formData.append("resume", file);
-            formData.append("jobDescription", jobDescription);
-            setLoadingText("Uploading Resume...");
-            const uploadResponse = await api.post("/resume/upload", formData);
-            const resumeId = uploadResponse.data.resumeId;
-            setLoadingText("Generating ATS Analysis...");
-            await api.post("/analysis/ats", { resumeId });
-            navigate(`/resume/${resumeId}`);
-        } catch (error) {
-            console.error(error);
-            alert("Upload Failed");
-        } finally {
-            setLoading(false);
-            setLoadingText("");
-        }
-    };
+  const handleUpload = async () => {
+    if (!file) {
+      setError("Please select a PDF resume.");
+      return;
+    }
+    try {
+      setError("");
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("resume", file);
+      formData.append("jobDescription", jobDescription);
+      setLoadingText("Uploading resume…");
+      const uploadResponse = await api.post("/resume/upload", formData);
+      const resumeId = uploadResponse.data.resumeId;
+      setLoadingText("Generating ATS analysis…");
+      await api.post("/analysis/ats", { resumeId });
+      navigate(`/resume/${resumeId}`);
+    } catch (err) {
+      console.error(err);
+      setError("Upload failed. Please try again.");
+    } finally {
+      setLoading(false);
+      setLoadingText("");
+    }
+  };
 
-    const handleDrop = (e) => {
-        e.preventDefault();
-        setDragOver(false);
-        const dropped = e.dataTransfer.files[0];
-        if (dropped && dropped.type === "application/pdf") {
-            setFile(dropped);
-        }
-    };
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const dropped = e.dataTransfer.files[0];
+    if (dropped && dropped.type === "application/pdf") {
+      setFile(dropped);
+      setError("");
+    }
+  };
 
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        setDragOver(true);
-    };
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
 
-    const handleDragLeave = () => setDragOver(false);
+  const handleDragLeave = () => setDragOver(false);
 
-    const steps = [
-        { icon: "↑", label: "Upload PDF" },
-        { icon: "◈", label: "AI Parsing" },
-        { icon: "✦", label: "ATS Score" },
-    ];
+  return (
+    <DashboardLayout>
+      <div className="max-w-[640px] mx-auto">
+        <SectionHeader eyebrow="New analysis" title="Upload Resume" description="Get an instant AI-powered ATS score and targeted improvement tips." className="mb-7" />
 
-    return (
-        <DashboardLayout>
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-                .upload-root { font-family: 'Inter', sans-serif; }
-
-                .upload-card {
-                    background: #0e0e1a;
-                    border-radius: 20px;
-                    border: 1px solid rgba(255,255,255,0.07);
-                    padding: 36px;
-                    box-shadow: 0 24px 64px rgba(0,0,0,0.4);
-                }
-
-                .drop-zone {
-                    border: 2px dashed rgba(124,58,237,0.35);
-                    border-radius: 16px;
-                    padding: 48px 24px;
-                    text-align: center;
-                    cursor: pointer;
-                    transition: border-color 0.2s, background 0.2s;
-                    position: relative;
-                    background: rgba(124,58,237,0.03);
-                }
-                .drop-zone:hover, .drop-zone.active {
-                    border-color: rgba(124,58,237,0.7);
-                    background: rgba(124,58,237,0.07);
-                }
-                .drop-zone input[type="file"] {
-                    position: absolute;
-                    inset: 0;
-                    opacity: 0;
-                    cursor: pointer;
-                    width: 100%;
-                    height: 100%;
-                }
-
-                .file-pill {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 10px;
-                    margin-top: 20px;
-                    background: rgba(124,58,237,0.12);
-                    border: 1px solid rgba(124,58,237,0.3);
-                    border-radius: 40px;
-                    padding: 8px 18px;
-                    color: #a78bfa;
-                    font-size: 13px;
-                    font-weight: 600;
-                    max-width: 100%;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                }
-                .file-pill .remove-btn {
-                    background: rgba(248,113,113,0.12);
-                    border: none;
-                    color: #f87171;
-                    border-radius: 50%;
-                    width: 20px;
-                    height: 20px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                    font-size: 11px;
-                    flex-shrink: 0;
-                    transition: background 0.15s;
-                }
-                .file-pill .remove-btn:hover { background: rgba(248,113,113,0.25); }
-
-                .jd-textarea {
-                    width: 100%;
-                    height: 148px;
-                    background: rgba(255,255,255,0.03);
-                    border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 14px;
-                    padding: 16px;
-                    color: #e5e7eb;
-                    font-size: 14px;
-                    font-family: 'Inter', sans-serif;
-                    resize: none;
-                    outline: none;
-                    transition: border-color 0.2s, background 0.2s;
-                    box-sizing: border-box;
-                }
-                .jd-textarea::placeholder { color: #374151; }
-                .jd-textarea:focus {
-                    border-color: rgba(124,58,237,0.5);
-                    background: rgba(124,58,237,0.04);
-                }
-
-                .analyze-btn {
-                    width: 100%;
-                    padding: 15px;
-                    border-radius: 14px;
-                    border: none;
-                    background: linear-gradient(135deg, #7c3aed, #6d28d9);
-                    color: #fff;
-                    font-size: 15px;
-                    font-weight: 700;
-                    cursor: pointer;
-                    box-shadow: 0 4px 24px rgba(124,58,237,0.4);
-                    transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 10px;
-                    letter-spacing: 0.01em;
-                }
-                .analyze-btn:hover:not(:disabled) {
-                    opacity: 0.9;
-                    transform: translateY(-1px);
-                    box-shadow: 0 8px 32px rgba(124,58,237,0.5);
-                }
-                .analyze-btn:disabled {
-                    opacity: 0.6;
-                    cursor: not-allowed;
-                }
-
-                .step-row {
-                    display: flex;
-                    align-items: center;
-                    gap: 0;
-                    margin-bottom: 36px;
-                }
-                .step-item {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 6px;
-                    flex: 1;
-                    position: relative;
-                }
-                .step-icon {
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    background: rgba(124,58,237,0.12);
-                    border: 1px solid rgba(124,58,237,0.25);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: #a78bfa;
-                    font-size: 16px;
-                    position: relative;
-                    z-index: 1;
-                }
-                .step-label {
-                    font-size: 11px;
-                    font-weight: 600;
-                    color: #4b5563;
-                    letter-spacing: 0.06em;
-                    text-transform: uppercase;
-                }
-                .step-connector {
-                    flex: 1;
-                    height: 1px;
-                    background: rgba(124,58,237,0.2);
-                    margin-top: -22px;
-                }
-
-                .spinner {
-                    width: 18px;
-                    height: 18px;
-                    border: 2px solid rgba(255,255,255,0.25);
-                    border-top-color: #fff;
-                    border-radius: 50%;
-                    animation: spin 0.7s linear infinite;
-                }
-                @keyframes spin { to { transform: rotate(360deg); } }
-
-                .section-divider {
-                    height: 1px;
-                    background: rgba(255,255,255,0.06);
-                    margin: 28px 0;
-                }
-            `}</style>
-
-            <div className="upload-root" style={{ maxWidth: 640, margin: "0 auto" }}>
-                {/* Header */}
-                <div style={{ marginBottom: 32 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                        <div style={{
-                            width: 8, height: 8, borderRadius: "50%",
-                            background: "#a78bfa", boxShadow: "0 0 10px #a78bfa",
-                        }} />
-                        <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6d28d9" }}>
-                            New Analysis
-                        </span>
-                    </div>
-                    <h1 style={{ fontSize: 34, fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em" }}>
-                        Upload Resume
-                    </h1>
-                    <p style={{ color: "#6b7280", marginTop: 8, fontSize: 15, lineHeight: 1.6 }}>
-                        Get an instant AI-powered ATS score and targeted improvement tips.
-                    </p>
+        <Panel className="p-7">
+          {/* Steps */}
+          <div className="flex items-center mb-8">
+            {STEPS.map((step, i) => (
+              <div key={step.label} className="flex items-center flex-1">
+                <div className="flex flex-col items-center gap-1.5 flex-1">
+                  <div className="w-9 h-9 rounded-full bg-brand-500/10 border border-brand-500/25 flex items-center justify-center text-brand-300 [&>svg]:w-4 [&>svg]:h-4">
+                    {step.icon}
+                  </div>
+                  <span className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-quaternary">
+                    {step.label}
+                  </span>
                 </div>
+                {i < STEPS.length - 1 && <div className="flex-1 h-px bg-border-strong -mt-5" />}
+              </div>
+            ))}
+          </div>
 
-                <div className="upload-card">
-                    {/* Steps */}
-                    <div className="step-row">
-                        {steps.map((step, i) => (
-                            <div key={i} style={{ display: "flex", alignItems: "center", flex: 1 }}>
-                                <div className="step-item">
-                                    <div className="step-icon">{step.icon}</div>
-                                    <span className="step-label">{step.label}</span>
-                                </div>
-                                {i < steps.length - 1 && <div className="step-connector" />}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Drop Zone */}
-                    <div
-                        className={`drop-zone${dragOver ? " active" : ""}`}
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                    >
-                        <input
-                            type="file"
-                            accept=".pdf"
-                            onChange={(e) => setFile(e.target.files[0])}
-                        />
-                        <div style={{
-                            width: 56, height: 56, borderRadius: "50%",
-                            background: "rgba(124,58,237,0.12)",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            margin: "0 auto 16px",
-                            fontSize: 24,
-                            pointerEvents: "none",
-                        }}>
-                            📄
-                        </div>
-                        <h2 style={{ fontSize: 17, fontWeight: 700, color: "#e5e7eb", margin: "0 0 8px", pointerEvents: "none" }}>
-                            Drop your PDF here
-                        </h2>
-                        <p style={{ color: "#4b5563", fontSize: 13, margin: 0, pointerEvents: "none" }}>
-                            or <span style={{ color: "#a78bfa", fontWeight: 600 }}>click to browse</span> — PDF only
-                        </p>
-                    </div>
-
-                    {file && (
-                        <div style={{ display: "flex", justifyContent: "center" }}>
-                            <div className="file-pill">
-                                <span>📎</span>
-                                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{file.name}</span>
-                                <button
-                                    className="remove-btn"
-                                    onClick={() => setFile(null)}
-                                >✕</button>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="section-divider" />
-
-                    {/* Job Description */}
-                    <div style={{ marginBottom: 24 }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                            <label style={{ fontSize: 13, fontWeight: 600, color: "#9ca3af", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                                Job Description
-                            </label>
-                            <span style={{ fontSize: 12, color: "#374151", fontWeight: 500 }}>Optional — boosts match accuracy</span>
-                        </div>
-                        <textarea
-                            className="jd-textarea"
-                            value={jobDescription}
-                            onChange={(e) => setJobDescription(e.target.value)}
-                            placeholder="Paste the job description here to get a tailored ATS score…"
-                        />
-                    </div>
-
-                    {/* CTA */}
-                    <button
-                        className="analyze-btn"
-                        onClick={handleUpload}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <>
-                                <div className="spinner" />
-                                {loadingText}
-                            </>
-                        ) : (
-                            <>
-                                <span style={{ fontSize: 16 }}>✦</span>
-                                Analyze Resume
-                            </>
-                        )}
-                    </button>
-
-                    <p style={{ textAlign: "center", fontSize: 12, color: "#374151", marginTop: 14, marginBottom: 0 }}>
-                        Your data is processed securely and never shared.
-                    </p>
-                </div>
+          {/* Drop zone */}
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={`relative rounded-xl border-2 border-dashed px-6 py-12 text-center cursor-pointer transition-colors duration-150 ${
+              dragOver ? "border-brand-500/70 bg-brand-500/[0.06]" : "border-brand-500/30 bg-brand-500/[0.02] hover:border-brand-500/50"
+            }`}
+          >
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={(e) => {
+                setFile(e.target.files[0]);
+                setError("");
+              }}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+            <div className="w-14 h-14 rounded-full bg-brand-500/10 flex items-center justify-center mx-auto mb-4 pointer-events-none text-brand-300 [&>svg]:w-6 [&>svg]:h-6">
+              <IconUpload />
             </div>
-        </DashboardLayout>
-    );
+            <h2 className="text-[16px] font-semibold text-ink-primary mb-1.5 pointer-events-none">
+              Drop your PDF here
+            </h2>
+            <p className="text-[13px] text-ink-quaternary pointer-events-none">
+              or <span className="text-brand-300 font-semibold">click to browse</span> — PDF only
+            </p>
+          </div>
+
+          {file && (
+            <div className="flex justify-center mt-4">
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-flex items-center gap-2.5 bg-brand-500/10 border border-brand-500/25 rounded-full px-3.5 py-1.5 max-w-full"
+              >
+                <IconPaperclip className="w-3.5 h-3.5 text-brand-300 shrink-0" />
+                <span className="text-[13px] font-medium text-brand-300 truncate">{file.name}</span>
+                <button
+                  onClick={() => setFile(null)}
+                  className="w-5 h-5 rounded-full bg-error-bg text-error flex items-center justify-center shrink-0 hover:bg-error-border transition-colors"
+                  aria-label="Remove file"
+                >
+                  <IconX className="w-2.5 h-2.5" />
+                </button>
+              </motion.div>
+            </div>
+          )}
+
+          {error && (
+            <p className="text-[13px] text-error text-center mt-3">{error}</p>
+          )}
+
+          <div className="h-px bg-border my-6" />
+
+          {/* Job description */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-tertiary">
+                Job description
+              </label>
+              <span className="text-[11px] text-ink-quaternary">Optional — boosts match accuracy</span>
+            </div>
+            <Textarea
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              placeholder="Paste the job description here to get a tailored ATS score…"
+              rows={6}
+            />
+          </div>
+
+          <Button onClick={handleUpload} loading={loading} className="w-full" size="lg" icon={!loading && <IconSparkle />}>
+            {loading ? loadingText : "Analyze resume"}
+          </Button>
+
+          <p className="flex items-center justify-center gap-1.5 text-[11.5px] text-ink-quaternary mt-3.5">
+            <IconLock className="w-3 h-3" />
+            Your data is processed securely and never shared
+          </p>
+        </Panel>
+      </div>
+    </DashboardLayout>
+  );
 }
 
 export default UploadResume;
