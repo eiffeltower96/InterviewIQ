@@ -177,8 +177,10 @@ function CareerCoachPage() {
 
   if (!resume) {
     return (
-      <DashboardLayout>
-        <Loader />
+      <DashboardLayout fullBleed>
+        <div className="h-full flex items-center justify-center">
+          <Loader />
+        </div>
       </DashboardLayout>
     );
   }
@@ -186,10 +188,10 @@ function CareerCoachPage() {
   const score = resume?.analysis?.atsScore;
 
   return (
-    <DashboardLayout>
-      <div className="flex rounded-xl border border-border overflow-hidden bg-canvas h-[calc(100vh-9.5rem)]">
+    <DashboardLayout fullBleed>
+      <div className="flex bg-canvas h-full w-full">
         {/* Desktop sidebar */}
-        <div className="hidden min-[900px]:block">
+        <div className="hidden min-[900px]:flex h-full">
           <CoachSidebar
             collapsed={sidebarCollapsed}
             onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
